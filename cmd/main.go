@@ -41,8 +41,7 @@ func main() {
 		log.Fatalf("Database table error: %v\n", db_table_err)
 	}
 
-	mc := fmt.Sprintf("mongodb://%s:%s", loadConfig.MONGODB_HOST, loadConfig.MONGODB_PORT) // "mongodb://localhost:27017"
-	// mc := fmt.Sprintf(loadConfig.MONGODB_STRING)
+	mc := fmt.Sprintf(loadConfig.MONGODB_STRING)
 
 	clientOptions := options.Client().ApplyURI(mc)
 
