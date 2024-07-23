@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o bin/broker-service ./cmd/.
+RUN go build -o bin/mono_pardo ./cmd/.
 
 EXPOSE 8000
 
