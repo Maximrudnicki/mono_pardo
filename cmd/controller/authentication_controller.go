@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"mono_pardo/cmd/data/request"
-	"mono_pardo/cmd/data/response"
+	"mono_pardo/pkg/data/request"
+	"mono_pardo/pkg/data/response"
 	"mono_pardo/cmd/service"
 
 	"github.com/gin-gonic/gin"

@@ -2,8 +2,8 @@ package service
 
 import (
 	"errors"
-	"mono_pardo/cmd/data/request"
-	"mono_pardo/cmd/data/response"
+	"mono_pardo/pkg/data/request"
+	"mono_pardo/pkg/data/response"
 	"mono_pardo/cmd/model"
 	"mono_pardo/cmd/repository"
 

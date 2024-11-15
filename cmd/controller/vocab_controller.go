@@ -1,13 +1,12 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
-	"mono_pardo/cmd/data/request"
-	"mono_pardo/cmd/data/response"
+	"mono_pardo/pkg/data/request"
+	"mono_pardo/pkg/data/response"
 	"mono_pardo/cmd/service"
 	"mono_pardo/cmd/utils"
 
@@ -72,7 +71,6 @@ func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 	}
 
 	err_dw := controller.vocabService.DeleteWord(req)
-	fmt.Println(err_dw)
 	if err_dw != nil || err_id != nil {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,
