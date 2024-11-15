@@ -7,8 +7,8 @@ import (
 
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/cmd/service"
-	"mono_pardo/cmd/utils"
+	"mono_pardo/internal/service"
+	"mono_pardo/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

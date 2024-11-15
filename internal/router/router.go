@@ -1,8 +1,8 @@
 package router
 
 import (
-	"mono_pardo/cmd/controller"
-	"mono_pardo/cmd/middleware"
+	"mono_pardo/internal/controller"
+	"mono_pardo/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )

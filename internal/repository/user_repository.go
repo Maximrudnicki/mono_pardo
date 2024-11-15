@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"mono_pardo/cmd/model"
+	"mono_pardo/internal/model"
 
 	"gorm.io/gorm"
 )

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/cmd/model"
-	"mono_pardo/cmd/repository"
+	"mono_pardo/internal/model"
+	"mono_pardo/internal/repository"
 
 	"github.com/go-playground/validator"
 )

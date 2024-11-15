@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"mono_pardo/pkg/config"
-	"mono_pardo/cmd/controller"
-	"mono_pardo/cmd/model"
-	"mono_pardo/cmd/repository"
-	"mono_pardo/cmd/router"
-	"mono_pardo/cmd/service"
+	"mono_pardo/internal/controller"
+	"mono_pardo/internal/model"
+	"mono_pardo/internal/repository"
+	"mono_pardo/internal/router"
+	"mono_pardo/internal/service"
 
 	"github.com/go-playground/validator"
 	"github.com/rs/cors"

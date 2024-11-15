@@ -6,9 +6,9 @@ import (
 	"mono_pardo/pkg/config"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/cmd/model"
-	"mono_pardo/cmd/repository"
-	"mono_pardo/cmd/utils"
+	"mono_pardo/internal/model"
+	"mono_pardo/internal/repository"
+	"mono_pardo/internal/utils"
 	"strconv"
 
 	"github.com/go-playground/validator"
