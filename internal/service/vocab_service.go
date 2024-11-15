@@ -2,10 +2,11 @@ package service
 
 import (
 	"errors"
+
+	wordsInfra "mono_pardo/internal/infrastructure/words"
+	"mono_pardo/internal/model"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/internal/model"
-	"mono_pardo/internal/repository"
 
 	"github.com/go-playground/validator"
 )
@@ -24,7 +25,18 @@ type VocabService interface {
 type VocabServiceImpl struct {
 	AuthenticationService AuthenticationService
 	Validate              *validator.Validate
-	WordRepository        repository.WordRepository
+	WordRepository        wordsInfra.WordRepository
+}
+
+func NewVocabServiceImpl(
+	authenticationService AuthenticationService,
+	validate *validator.Validate,
+	wordRepository wordsInfra.WordRepository) VocabService {
+	return &VocabServiceImpl{
+		AuthenticationService: authenticationService,
+		Validate:              validate,
+		WordRepository:        wordRepository,
+	}
 }
 
 // AddWordToStudent implements VocabService.
@@ -203,15 +215,4 @@ func (v *VocabServiceImpl) UpdateWordStatus(updateWordStatusRequest request.Upda
 	}
 
 	return nil
-}
-
-func NewVocabServiceImpl(
-	authenticationService AuthenticationService,
-	validate *validator.Validate,
-	wordRepository repository.WordRepository) VocabService {
-	return &VocabServiceImpl{
-		AuthenticationService: authenticationService,
-		Validate:              validate,
-		WordRepository:        wordRepository,
-	}
 }

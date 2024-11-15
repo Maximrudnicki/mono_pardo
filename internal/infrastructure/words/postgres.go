@@ -1,4 +1,4 @@
-package repository
+package words
 
 import (
 	"errors"
@@ -7,22 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type WordRepository interface {
-	Add(word model.Word) (int, error)
-	Save(word model.Word) error
-	Update(word model.Word) error
-	UpdateStatus(word model.Word) error
-	Delete(wordId int)
-	FindByUserId(userId int) ([]model.Word, error)
-	FindById(wordId int) (model.Word, error)
-	ManageTrainings(res bool, training string, wordId int) error
-
-	// utils
-	IsOwnerOfWord(userId int, wordId int) bool
-}
-
 type WordRepositoryImpl struct {
 	Db *gorm.DB
+}
+
+func NewPostgresRepositoryImpl(Db *gorm.DB) WordRepository {
+	return &WordRepositoryImpl{Db: Db}
 }
 
 // ManageTrainings implements WordRepository.
@@ -145,8 +135,4 @@ func (w *WordRepositoryImpl) IsOwnerOfWord(userId int, wordId int) bool {
 	} else {
 		return false
 	}
-}
-
-func NewWordRepositoryImpl(Db *gorm.DB) WordRepository {
-	return &WordRepositoryImpl{Db: Db}
 }

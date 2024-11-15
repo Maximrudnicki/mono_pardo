@@ -5,12 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"mono_pardo/pkg/config"
 	"mono_pardo/internal/controller"
+	usersInfra "mono_pardo/internal/infrastructure/users"
+	wordsInfra "mono_pardo/internal/infrastructure/words"
 	"mono_pardo/internal/model"
-	"mono_pardo/internal/repository"
 	"mono_pardo/internal/router"
 	"mono_pardo/internal/service"
+	"mono_pardo/pkg/config"
 
 	"github.com/go-playground/validator"
 	"github.com/rs/cors"
@@ -38,8 +39,8 @@ func main() {
 	}
 
 	//Init Repositories
-	userRepository := repository.NewUsersRepositoryImpl(db)
-	wordRepository := repository.NewWordRepositoryImpl(db)
+	userRepository := usersInfra.NewPostgresRepositoryImpl(db)
+	wordRepository := wordsInfra.NewPostgresRepositoryImpl(db)
 
 	//Init Services
 	authenticationService := service.NewAuthenticationServiceImpl(loadConfig, validate, userRepository)

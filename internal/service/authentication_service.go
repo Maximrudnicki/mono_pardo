@@ -3,12 +3,13 @@ package service
 import (
 	"fmt"
 	"log"
+
+	usersInfra "mono_pardo/internal/infrastructure/users"
+	"mono_pardo/internal/model"
+	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/internal/model"
-	"mono_pardo/internal/repository"
-	"mono_pardo/internal/utils"
 	"strconv"
 
 	"github.com/go-playground/validator"
@@ -24,7 +25,18 @@ type AuthenticationService interface {
 type AuthenticationServiceImpl struct {
 	Config         config.Config
 	Validate       *validator.Validate
-	UserRepository repository.UsersRepository
+	UserRepository usersInfra.UsersRepository
+}
+
+func NewAuthenticationServiceImpl(
+	config config.Config,
+	validate *validator.Validate,
+	userRepository usersInfra.UsersRepository) AuthenticationService {
+	return &AuthenticationServiceImpl{
+		Config:         config,
+		Validate:       validate,
+		UserRepository: userRepository,
+	}
 }
 
 // Login implements AuthenticationService.
@@ -95,12 +107,4 @@ func (a *AuthenticationServiceImpl) FindUser(userId int) (response.UserResponse,
 		Email:    user.Email,
 		Username: user.Username,
 	}, nil
-}
-
-func NewAuthenticationServiceImpl(config config.Config, validate *validator.Validate, userRepository repository.UsersRepository) AuthenticationService {
-	return &AuthenticationServiceImpl{
-		Config:         config,
-		Validate:       validate,
-		UserRepository: userRepository,
-	}
 }

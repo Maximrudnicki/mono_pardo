@@ -1,4 +1,4 @@
-package repository
+package users
 
 import (
 	"errors"
@@ -7,19 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type UsersRepository interface {
-	Save(user model.User) error
-	Delete(usersId int)
-	FindById(usersId int) (model.User, error)
-	FindAll() []model.User
-	FindByEmail(email string) (model.User, error)
-}
-
 type UsersRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewUsersRepositoryImpl(Db *gorm.DB) UsersRepository {
+func NewPostgresRepositoryImpl(Db *gorm.DB) UsersRepository {
 	return &UsersRepositoryImpl{Db: Db}
 }
 
