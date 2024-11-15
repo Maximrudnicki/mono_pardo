@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"mono_pardo/cmd/config"
+	"mono_pardo/pkg/config"
 	"mono_pardo/cmd/controller"
 	"mono_pardo/cmd/model"
 	"mono_pardo/cmd/repository"
@@ -38,7 +38,6 @@ func main() {
 	}
 
 	//Init Repositories
-
 	userRepository := repository.NewUsersRepositoryImpl(db)
 	wordRepository := repository.NewWordRepositoryImpl(db)
 

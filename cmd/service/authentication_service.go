@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
-	"mono_pardo/cmd/config"
+	"mono_pardo/pkg/config"
 	"mono_pardo/cmd/data/request"
 	"mono_pardo/cmd/data/response"
 	"mono_pardo/cmd/model"
