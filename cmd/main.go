@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,9 +14,6 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/rs/cors"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -41,21 +37,7 @@ func main() {
 		log.Fatalf("Database table error: %v\n", db_table_err)
 	}
 
-	mc := fmt.Sprintf(loadConfig.MONGODB_STRING)
-
-	clientOptions := options.Client().ApplyURI(mc)
-
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Println("Error connecting:", err)
-	}
-
-	groupCollection := client.Database(loadConfig.MONGODB_DB).Collection("groups")
-	statisticsCollection := client.Database(loadConfig.MONGODB_DB).Collection("statistics")
-
 	//Init Repositories
-	groupRepository := repository.NewGroupRepositoryImpl(groupCollection)
-	statisticsRepository := repository.NewStatisticsRepositoryImpl(statisticsCollection)
 
 	userRepository := repository.NewUsersRepositoryImpl(db)
 	wordRepository := repository.NewWordRepositoryImpl(db)
@@ -63,15 +45,12 @@ func main() {
 	//Init Services
 	authenticationService := service.NewAuthenticationServiceImpl(loadConfig, validate, userRepository)
 	vocabService := service.NewVocabServiceImpl(authenticationService, validate, wordRepository)
-	groupService := service.NewGroupServiceImpl(
-		authenticationService, vocabService, validate, groupRepository, statisticsRepository)
 
 	//Init controllers
 	authenticationController := controller.NewAuthenticationController(authenticationService)
 	vocabController := controller.NewVocabController(vocabService)
-	groupController := controller.NewGroupController(groupService, vocabService)
 
-	r := router.NewRouter(authenticationController, vocabController, groupController)
+	r := router.NewRouter(authenticationController, vocabController)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{loadConfig.ALLOWED_ORIGINS},

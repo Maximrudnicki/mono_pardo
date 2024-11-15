@@ -17,11 +17,6 @@ type Config struct {
 	DBTestName string `mapstructure:"POSTGRES_DB_TEST"`
 	DBPort     string `mapstructure:"POSTGRES_PORT"`
 
-	MONGODB_HOST   string `mapstructure:"MONGODB_HOST"`
-	MONGODB_DB     string `mapstructure:"MONGODB_DB"`
-	MONGODB_PORT   string `mapstructure:"MONGODB_PORT"`
-	MONGODB_STRING string `mapstructure:"MONGODB_STRING"`
-
 	TokenSecret    string        `mapstructure:"TOKEN_SECRET"`
 	TokenExpiresIn time.Duration `mapstructure:"TOKEN_EXPIRED_IN"`
 	TokenMaxAge    int           `mapstructure:"TOKEN_MAXAGE"`
