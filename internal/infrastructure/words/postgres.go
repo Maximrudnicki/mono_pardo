@@ -2,8 +2,8 @@ package words
 
 import (
 	"errors"
-	"mono_pardo/internal/domain/model"
-	"mono_pardo/internal/domain/words"
+
+	domain "mono_pardo/internal/domain/words"
 
 	"gorm.io/gorm"
 )
@@ -12,13 +12,13 @@ type WordRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) words.WordRepository {
+func NewPostgresRepositoryImpl(Db *gorm.DB) domain.WordRepository {
 	return &WordRepositoryImpl{Db: Db}
 }
 
 // ManageTrainings implements WordRepository.
 func (w *WordRepositoryImpl) ManageTrainings(res bool, training string, wordId int) error {
-	var word model.Word
+	var word domain.Word
 	result := w.Db.Where("id = ?", wordId).Find(&word)
 	if result.Error != nil {
 		return errors.New("cannot find word")
@@ -52,7 +52,7 @@ func (w *WordRepositoryImpl) ManageTrainings(res bool, training string, wordId i
 
 // Delete implements WordRepository.
 func (w *WordRepositoryImpl) Delete(wordId int) {
-	var word model.Word
+	var word domain.Word
 	result := w.Db.Where("id = ?", wordId).Delete(&word)
 	if result.Error != nil {
 		panic(result.Error)
@@ -60,8 +60,8 @@ func (w *WordRepositoryImpl) Delete(wordId int) {
 }
 
 // FindByUserId implements WordRepository.
-func (w *WordRepositoryImpl) FindByUserId(userId int) ([]model.Word, error) {
-	var words []model.Word
+func (w *WordRepositoryImpl) FindByUserId(userId int) ([]domain.Word, error) {
+	var words []domain.Word
 	result := w.Db.Where("user_id = ?", userId).Find(&words)
 	// Should return empty slice in case if user exists.
 	// It's made for case if user exists but have not added any words yet
@@ -73,8 +73,8 @@ func (w *WordRepositoryImpl) FindByUserId(userId int) ([]model.Word, error) {
 }
 
 // FindByUserId implements WordRepository.
-func (w *WordRepositoryImpl) FindById(wordId int) (model.Word, error) {
-	var word model.Word
+func (w *WordRepositoryImpl) FindById(wordId int) (domain.Word, error) {
+	var word domain.Word
 	result := w.Db.Where("id = ?", wordId).Find(&word)
 	if result != nil {
 		return word, nil
@@ -84,7 +84,7 @@ func (w *WordRepositoryImpl) FindById(wordId int) (model.Word, error) {
 }
 
 // Add implements WordRepository.
-func (w *WordRepositoryImpl) Add(word model.Word) (int, error) {
+func (w *WordRepositoryImpl) Add(word domain.Word) (int, error) {
 	result := w.Db.Create(&word)
 	if result.Error != nil {
 		return 0, errors.New("cannot add word")
@@ -93,7 +93,7 @@ func (w *WordRepositoryImpl) Add(word model.Word) (int, error) {
 }
 
 // Save implements WordRepository.
-func (w *WordRepositoryImpl) Save(word model.Word) error {
+func (w *WordRepositoryImpl) Save(word domain.Word) error {
 	result := w.Db.Create(&word)
 	if result.Error != nil {
 		return errors.New("cannot save word")
@@ -102,8 +102,8 @@ func (w *WordRepositoryImpl) Save(word model.Word) error {
 }
 
 // Update implements WordRepository.
-func (w *WordRepositoryImpl) Update(word model.Word) error {
-	var updatedWord = &model.Word{
+func (w *WordRepositoryImpl) Update(word domain.Word) error {
+	var updatedWord = &domain.Word{
 		Definition: word.Definition,
 	}
 
@@ -115,7 +115,7 @@ func (w *WordRepositoryImpl) Update(word model.Word) error {
 }
 
 // UpdateStatus implements WordRepository.
-func (w *WordRepositoryImpl) UpdateStatus(word model.Word) error {
+func (w *WordRepositoryImpl) UpdateStatus(word domain.Word) error {
 	result := w.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
 	if result.Error != nil {
 		return errors.New("cannot update status")
@@ -125,7 +125,7 @@ func (w *WordRepositoryImpl) UpdateStatus(word model.Word) error {
 
 // IsOwnerOfWord implements WordRepository.
 func (w *WordRepositoryImpl) IsOwnerOfWord(userId int, wordId int) bool {
-	var word model.Word
+	var word domain.Word
 	result := w.Db.Where("id = ?", wordId).Find(&word)
 	if result.Error != nil {
 		panic(result.Error)

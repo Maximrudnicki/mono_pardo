@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"mono_pardo/internal/domain/words"
-	"mono_pardo/internal/domain/model"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 
@@ -41,7 +40,7 @@ func NewVocabServiceImpl(
 
 // AddWordToStudent implements VocabService.
 func (v *VocabServiceImpl) AddWordToStudent(addWordToStudentRequest request.AddWordToStudentRequest) (int, error) {
-	newWord := model.Word{
+	newWord := words.Word{
 		Word:       addWordToStudentRequest.Word,
 		Definition: addWordToStudentRequest.Definition,
 		UserId:     addWordToStudentRequest.UserId,
@@ -62,7 +61,7 @@ func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordReques
 		return err
 	}
 
-	newWord := model.Word{
+	newWord := words.Word{
 		Word:       createWordRequest.Word,
 		Definition: createWordRequest.Definition,
 		UserId:     userId,
@@ -174,7 +173,7 @@ func (v *VocabServiceImpl) UpdateWord(updateWordRequest request.UpdateWordReques
 		return err
 	}
 
-	updatedWord := model.Word{
+	updatedWord := words.Word{
 		Id:         updateWordRequest.WordId,
 		Definition: updateWordRequest.Definition,
 		UserId:     userId,
@@ -199,7 +198,7 @@ func (v *VocabServiceImpl) UpdateWordStatus(updateWordStatusRequest request.Upda
 		return err
 	}
 
-	updatedWord := model.Word{
+	updatedWord := words.Word{
 		Id:        updateWordStatusRequest.WordId,
 		IsLearned: updateWordStatusRequest.IsLearned,
 		UserId:    userId,

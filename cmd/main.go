@@ -9,7 +9,7 @@ import (
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
 	usersDomain "mono_pardo/internal/domain/users"
-	"mono_pardo/internal/domain/model"
+	wordsDomain "mono_pardo/internal/domain/words"
 	"mono_pardo/internal/router"
 	"mono_pardo/internal/domain/service"
 	"mono_pardo/pkg/config"
@@ -29,7 +29,7 @@ func main() {
 	//Database
 	db := config.ConnectionDB(&loadConfig)
 
-	db_table_err := db.Table("words").AutoMigrate(&model.Word{})
+	db_table_err := db.Table("words").AutoMigrate(&wordsDomain.Word{})
 	if db_table_err != nil {
 		log.Fatalf("Database table error: %v\n", db_table_err)
 	}

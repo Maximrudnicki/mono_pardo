@@ -1,15 +1,13 @@
 package words
 
-import "mono_pardo/internal/domain/model"
-
 type WordRepository interface {
-	Add(word model.Word) (int, error)
-	Save(word model.Word) error
-	Update(word model.Word) error
-	UpdateStatus(word model.Word) error
+	Add(word Word) (int, error)
+	Save(word Word) error
+	Update(word Word) error
+	UpdateStatus(word Word) error
 	Delete(wordId int)
-	FindByUserId(userId int) ([]model.Word, error)
-	FindById(wordId int) (model.Word, error)
+	FindByUserId(userId int) ([]Word, error)
+	FindById(wordId int) (Word, error)
 	ManageTrainings(res bool, training string, wordId int) error
 
 	// utils
