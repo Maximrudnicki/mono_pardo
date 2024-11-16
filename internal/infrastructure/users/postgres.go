@@ -2,8 +2,8 @@ package users
 
 import (
 	"errors"
-	"mono_pardo/internal/domain/model"
-	"mono_pardo/internal/domain/users"
+
+	domain "mono_pardo/internal/domain/users"
 
 	"gorm.io/gorm"
 )
@@ -12,12 +12,12 @@ type UsersRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) users.UsersRepository {
+func NewPostgresRepositoryImpl(Db *gorm.DB) domain.UsersRepository {
 	return &UsersRepositoryImpl{Db: Db}
 }
 
 // Save implements UsersRepository
-func (u *UsersRepositoryImpl) Save(user model.User) error {
+func (u *UsersRepositoryImpl) Save(user domain.User) error {
 	result := u.Db.Create(&user)
 	if result.Error != nil {
 		return errors.New("please use different email")
@@ -27,7 +27,7 @@ func (u *UsersRepositoryImpl) Save(user model.User) error {
 
 // Delete implements UsersRepository
 func (u *UsersRepositoryImpl) Delete(usersId int) {
-	var user model.User
+	var user domain.User
 	result := u.Db.Where("id = ?", usersId).Delete(&user)
 	if result.Error != nil {
 		panic(result.Error)
@@ -35,8 +35,8 @@ func (u *UsersRepositoryImpl) Delete(usersId int) {
 }
 
 // FindAll implements UsersRepository
-func (u *UsersRepositoryImpl) FindAll() []model.User {
-	var user []model.User
+func (u *UsersRepositoryImpl) FindAll() []domain.User {
+	var user []domain.User
 	results := u.Db.Find(&user)
 	if results.Error != nil {
 		panic(results.Error)
@@ -45,8 +45,8 @@ func (u *UsersRepositoryImpl) FindAll() []model.User {
 }
 
 // FindById implements UsersRepository
-func (u *UsersRepositoryImpl) FindById(userId int) (model.User, error) {
-	var user model.User
+func (u *UsersRepositoryImpl) FindById(userId int) (domain.User, error) {
+	var user domain.User
 	result := u.Db.Find(&user, userId)
 	if result != nil {
 		return user, nil
@@ -56,8 +56,8 @@ func (u *UsersRepositoryImpl) FindById(userId int) (model.User, error) {
 }
 
 // FindByUsername implements UsersRepository
-func (u *UsersRepositoryImpl) FindByEmail(email string) (model.User, error) {
-	var user model.User
+func (u *UsersRepositoryImpl) FindByEmail(email string) (domain.User, error) {
+	var user domain.User
 	result := u.Db.First(&user, "email = ?", email)
 
 	if result.Error != nil {

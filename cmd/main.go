@@ -8,6 +8,7 @@ import (
 	"mono_pardo/internal/controller"
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
+	usersDomain "mono_pardo/internal/domain/users"
 	"mono_pardo/internal/domain/model"
 	"mono_pardo/internal/router"
 	"mono_pardo/internal/domain/service"
@@ -33,7 +34,7 @@ func main() {
 		log.Fatalf("Database table error: %v\n", db_table_err)
 	}
 
-	db_table_err = db.Table("users").AutoMigrate(&model.User{})
+	db_table_err = db.Table("users").AutoMigrate(&usersDomain.User{})
 	if db_table_err != nil {
 		log.Fatalf("Database table error: %v\n", db_table_err)
 	}

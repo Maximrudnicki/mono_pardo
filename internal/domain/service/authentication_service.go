@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"mono_pardo/internal/domain/model"
 	"mono_pardo/internal/domain/users"
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
@@ -67,7 +66,7 @@ func (a *AuthenticationServiceImpl) Register(user request.CreateUserRequest) err
 		return err
 	}
 
-	newUser := model.User{
+	newUser := users.User{
 		Username: user.Username,
 		Email:    user.Email,
 		Password: hashedPassword,
