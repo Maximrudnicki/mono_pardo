@@ -1,15 +1,14 @@
-package router
+package controller
 
 import (
-	"mono_pardo/internal/controller"
 	"mono_pardo/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(
-	authenticationController *controller.AuthenticationController,
-	vocabController *controller.VocabController) *gin.Engine {
+	authenticationController *AuthenticationController,
+	vocabController *VocabController) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.LoggerMiddleware())

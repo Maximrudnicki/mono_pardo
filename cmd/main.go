@@ -10,7 +10,6 @@ import (
 	wordsDomain "mono_pardo/internal/domain/words"
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
-	"mono_pardo/internal/router"
 	"mono_pardo/pkg/config"
 
 	"github.com/go-playground/validator"
@@ -50,7 +49,7 @@ func main() {
 	authenticationController := controller.NewAuthenticationController(authenticationService)
 	vocabController := controller.NewVocabController(vocabService)
 
-	r := router.NewRouter(authenticationController, vocabController)
+	router := controller.NewRouter(authenticationController, vocabController)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{loadConfig.ALLOWED_ORIGINS},
@@ -59,7 +58,7 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	handler := c.Handler(r)
+	handler := c.Handler(router)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", loadConfig.PORT),
