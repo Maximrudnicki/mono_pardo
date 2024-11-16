@@ -13,13 +13,6 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type AuthenticationService interface {
-	Login(user request.LoginRequest) (string, error)
-	Register(user request.CreateUserRequest) error
-	GetUserId(token string) (int, error)
-	FindUser(userId int) (response.UserResponse, error)
-}
-
 type AuthenticationServiceImpl struct {
 	Config         config.Config
 	Validate       *validator.Validate

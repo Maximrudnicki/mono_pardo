@@ -10,17 +10,6 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type VocabService interface {
-	CreateWord(createWordRequest request.CreateWordRequest) error
-	DeleteWord(deleteWordRequest request.DeleteWordRequest) error
-	GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error)
-	FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error)
-	UpdateWord(updateWordRequest request.UpdateWordRequest) error
-	UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error
-	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
-	AddWordToStudent(addWordToStudentRequest request.AddWordToStudentRequest) (int, error)
-}
-
 type VocabServiceImpl struct {
 	AuthenticationService usersDomain.AuthenticationService
 	Validate              *validator.Validate
