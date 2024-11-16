@@ -4,18 +4,18 @@ import (
 	"log"
 	"net/http"
 
+	usersDomain "mono_pardo/internal/domain/users"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/internal/domain/service"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthenticationController struct {
-	authenticationService service.AuthenticationService
+	authenticationService usersDomain.AuthenticationService
 }
 
-func NewAuthenticationController(service service.AuthenticationService) *AuthenticationController {
+func NewAuthenticationController(service usersDomain.AuthenticationService) *AuthenticationController {
 	return &AuthenticationController{authenticationService: service}
 }
 

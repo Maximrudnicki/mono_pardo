@@ -1,9 +1,9 @@
-package service
+package words
 
 import (
 	"errors"
 
-	"mono_pardo/internal/domain/words"
+	usersDomain "mono_pardo/internal/domain/users"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 
@@ -22,15 +22,15 @@ type VocabService interface {
 }
 
 type VocabServiceImpl struct {
-	AuthenticationService AuthenticationService
+	AuthenticationService usersDomain.AuthenticationService
 	Validate              *validator.Validate
-	WordRepository        words.WordRepository
+	WordRepository        WordRepository
 }
 
 func NewVocabServiceImpl(
-	authenticationService AuthenticationService,
+	authenticationService usersDomain.AuthenticationService,
 	validate *validator.Validate,
-	wordRepository words.WordRepository) VocabService {
+	wordRepository WordRepository) VocabService {
 	return &VocabServiceImpl{
 		AuthenticationService: authenticationService,
 		Validate:              validate,
@@ -40,7 +40,7 @@ func NewVocabServiceImpl(
 
 // AddWordToStudent implements VocabService.
 func (v *VocabServiceImpl) AddWordToStudent(addWordToStudentRequest request.AddWordToStudentRequest) (int, error) {
-	newWord := words.Word{
+	newWord := Word{
 		Word:       addWordToStudentRequest.Word,
 		Definition: addWordToStudentRequest.Definition,
 		UserId:     addWordToStudentRequest.UserId,
@@ -61,7 +61,7 @@ func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordReques
 		return err
 	}
 
-	newWord := words.Word{
+	newWord := Word{
 		Word:       createWordRequest.Word,
 		Definition: createWordRequest.Definition,
 		UserId:     userId,
@@ -173,7 +173,7 @@ func (v *VocabServiceImpl) UpdateWord(updateWordRequest request.UpdateWordReques
 		return err
 	}
 
-	updatedWord := words.Word{
+	updatedWord := Word{
 		Id:         updateWordRequest.WordId,
 		Definition: updateWordRequest.Definition,
 		UserId:     userId,
@@ -198,7 +198,7 @@ func (v *VocabServiceImpl) UpdateWordStatus(updateWordStatusRequest request.Upda
 		return err
 	}
 
-	updatedWord := words.Word{
+	updatedWord := Word{
 		Id:        updateWordStatusRequest.WordId,
 		IsLearned: updateWordStatusRequest.IsLearned,
 		UserId:    userId,

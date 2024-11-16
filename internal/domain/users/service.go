@@ -1,15 +1,14 @@
-package service
+package users
 
 import (
 	"fmt"
 	"log"
+	"strconv"
 
-	"mono_pardo/internal/domain/users"
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"strconv"
 
 	"github.com/go-playground/validator"
 )
@@ -24,13 +23,13 @@ type AuthenticationService interface {
 type AuthenticationServiceImpl struct {
 	Config         config.Config
 	Validate       *validator.Validate
-	UserRepository users.UsersRepository
+	UserRepository UsersRepository
 }
 
 func NewAuthenticationServiceImpl(
 	config config.Config,
 	validate *validator.Validate,
-	userRepository users.UsersRepository) AuthenticationService {
+	userRepository UsersRepository) AuthenticationService {
 	return &AuthenticationServiceImpl{
 		Config:         config,
 		Validate:       validate,
@@ -66,7 +65,7 @@ func (a *AuthenticationServiceImpl) Register(user request.CreateUserRequest) err
 		return err
 	}
 
-	newUser := users.User{
+	newUser := User{
 		Username: user.Username,
 		Email:    user.Email,
 		Password: hashedPassword,

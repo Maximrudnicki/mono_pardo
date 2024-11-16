@@ -6,12 +6,11 @@ import (
 	"net/http"
 
 	"mono_pardo/internal/controller"
-	usersInfra "mono_pardo/internal/infrastructure/users"
-	wordsInfra "mono_pardo/internal/infrastructure/words"
 	usersDomain "mono_pardo/internal/domain/users"
 	wordsDomain "mono_pardo/internal/domain/words"
+	usersInfra "mono_pardo/internal/infrastructure/users"
+	wordsInfra "mono_pardo/internal/infrastructure/words"
 	"mono_pardo/internal/router"
-	"mono_pardo/internal/domain/service"
 	"mono_pardo/pkg/config"
 
 	"github.com/go-playground/validator"
@@ -44,8 +43,8 @@ func main() {
 	wordRepository := wordsInfra.NewPostgresRepositoryImpl(db)
 
 	//Init Services
-	authenticationService := service.NewAuthenticationServiceImpl(loadConfig, validate, userRepository)
-	vocabService := service.NewVocabServiceImpl(authenticationService, validate, wordRepository)
+	authenticationService := usersDomain.NewAuthenticationServiceImpl(loadConfig, validate, userRepository)
+	vocabService := wordsDomain.NewVocabServiceImpl(authenticationService, validate, wordRepository)
 
 	//Init controllers
 	authenticationController := controller.NewAuthenticationController(authenticationService)
