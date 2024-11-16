@@ -5,7 +5,7 @@ import (
 	"mono_pardo/pkg/data/response"
 )
 
-type VocabService interface {
+type Service interface {
 	CreateWord(createWordRequest request.CreateWordRequest) error
 	DeleteWord(deleteWordRequest request.DeleteWordRequest) error
 	GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error)
@@ -15,7 +15,7 @@ type VocabService interface {
 	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
 }
 
-type WordRepository interface {
+type Repository interface {
 	Add(word Word) (int, error)
 	Save(word Word) error
 	Update(word Word) error

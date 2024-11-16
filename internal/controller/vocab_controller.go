@@ -14,10 +14,10 @@ import (
 )
 
 type VocabController struct {
-	vocabService wordsDomain.VocabService
+	vocabService wordsDomain.Service
 }
 
-func NewVocabController(service wordsDomain.VocabService) *VocabController {
+func NewVocabController(service wordsDomain.Service) *VocabController {
 	return &VocabController{vocabService: service}
 }
 

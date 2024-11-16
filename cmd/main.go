@@ -44,7 +44,7 @@ func main() {
 
 	//Init Services
 	authenticationService := usersDomain.NewServiceImpl(loadConfig, validate, userRepository)
-	vocabService := wordsDomain.NewVocabServiceImpl(authenticationService, validate, wordRepository)
+	vocabService := wordsDomain.NewServiceImpl(authenticationService, validate, wordRepository)
 
 	//Init controllers
 	authenticationController := controller.NewAuthenticationController(authenticationService)

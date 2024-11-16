@@ -8,18 +8,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type WordRepositoryImpl struct {
+type RepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) domain.WordRepository {
-	return &WordRepositoryImpl{Db: Db}
+func NewPostgresRepositoryImpl(Db *gorm.DB) domain.Repository {
+	return &RepositoryImpl{Db: Db}
 }
 
-// ManageTrainings implements WordRepository.
-func (w *WordRepositoryImpl) ManageTrainings(res bool, training string, wordId int) error {
+func (r *RepositoryImpl) ManageTrainings(res bool, training string, wordId int) error {
 	var word domain.Word
-	result := w.Db.Where("id = ?", wordId).Find(&word)
+	result := r.Db.Where("id = ?", wordId).Find(&word)
 	if result.Error != nil {
 		return errors.New("cannot find word")
 	}
@@ -43,26 +42,24 @@ func (w *WordRepositoryImpl) ManageTrainings(res bool, training string, wordId i
 		word.IsLearned = false
 	}
 
-	result = w.Db.Save(&word)
+	result = r.Db.Save(&word)
 	if result.Error != nil {
 		return errors.New("cannot save word")
 	}
 	return nil
 }
 
-// Delete implements WordRepository.
-func (w *WordRepositoryImpl) Delete(wordId int) {
+func (r *RepositoryImpl) Delete(wordId int) {
 	var word domain.Word
-	result := w.Db.Where("id = ?", wordId).Delete(&word)
+	result := r.Db.Where("id = ?", wordId).Delete(&word)
 	if result.Error != nil {
 		panic(result.Error)
 	}
 }
 
-// FindByUserId implements WordRepository.
-func (w *WordRepositoryImpl) FindByUserId(userId int) ([]domain.Word, error) {
+func (r *RepositoryImpl) FindByUserId(userId int) ([]domain.Word, error) {
 	var words []domain.Word
-	result := w.Db.Where("user_id = ?", userId).Find(&words)
+	result := r.Db.Where("user_id = ?", userId).Find(&words)
 	// Should return empty slice in case if user exists.
 	// It's made for case if user exists but have not added any words yet
 	if result != nil {
@@ -72,10 +69,9 @@ func (w *WordRepositoryImpl) FindByUserId(userId int) ([]domain.Word, error) {
 	}
 }
 
-// FindByUserId implements WordRepository.
-func (w *WordRepositoryImpl) FindById(wordId int) (domain.Word, error) {
+func (r *RepositoryImpl) FindById(wordId int) (domain.Word, error) {
 	var word domain.Word
-	result := w.Db.Where("id = ?", wordId).Find(&word)
+	result := r.Db.Where("id = ?", wordId).Find(&word)
 	if result != nil {
 		return word, nil
 	} else {
@@ -83,50 +79,45 @@ func (w *WordRepositoryImpl) FindById(wordId int) (domain.Word, error) {
 	}
 }
 
-// Add implements WordRepository.
-func (w *WordRepositoryImpl) Add(word domain.Word) (int, error) {
-	result := w.Db.Create(&word)
+func (r *RepositoryImpl) Add(word domain.Word) (int, error) {
+	result := r.Db.Create(&word)
 	if result.Error != nil {
 		return 0, errors.New("cannot add word")
 	}
 	return word.Id, nil
 }
 
-// Save implements WordRepository.
-func (w *WordRepositoryImpl) Save(word domain.Word) error {
-	result := w.Db.Create(&word)
+func (r *RepositoryImpl) Save(word domain.Word) error {
+	result := r.Db.Create(&word)
 	if result.Error != nil {
 		return errors.New("cannot save word")
 	}
 	return nil
 }
 
-// Update implements WordRepository.
-func (w *WordRepositoryImpl) Update(word domain.Word) error {
+func (r *RepositoryImpl) Update(word domain.Word) error {
 	var updatedWord = &domain.Word{
 		Definition: word.Definition,
 	}
 
-	result := w.Db.Model(&word).Where("id = ?", word.Id).Updates(updatedWord)
+	result := r.Db.Model(&word).Where("id = ?", word.Id).Updates(updatedWord)
 	if result.Error != nil {
 		return errors.New("cannot update word")
 	}
 	return nil
 }
 
-// UpdateStatus implements WordRepository.
-func (w *WordRepositoryImpl) UpdateStatus(word domain.Word) error {
-	result := w.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
+func (r *RepositoryImpl) UpdateStatus(word domain.Word) error {
+	result := r.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
 	if result.Error != nil {
 		return errors.New("cannot update status")
 	}
 	return nil
 }
 
-// IsOwnerOfWord implements WordRepository.
-func (w *WordRepositoryImpl) IsOwnerOfWord(userId int, wordId int) bool {
+func (r *RepositoryImpl) IsOwnerOfWord(userId int, wordId int) bool {
 	var word domain.Word
-	result := w.Db.Where("id = ?", wordId).Find(&word)
+	result := r.Db.Where("id = ?", wordId).Find(&word)
 	if result.Error != nil {
 		panic(result.Error)
 	}

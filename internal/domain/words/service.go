@@ -10,26 +10,25 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type VocabServiceImpl struct {
+type ServiceImpl struct {
 	AuthenticationService usersDomain.Service
 	Validate              *validator.Validate
-	WordRepository        WordRepository
+	Repository            Repository
 }
 
-func NewVocabServiceImpl(
+func NewServiceImpl(
 	authenticationService usersDomain.Service,
 	validate *validator.Validate,
-	wordRepository WordRepository) VocabService {
-	return &VocabServiceImpl{
+	repository Repository) Service {
+	return &ServiceImpl{
 		AuthenticationService: authenticationService,
 		Validate:              validate,
-		WordRepository:        wordRepository,
+		Repository:            repository,
 	}
 }
 
-// CreateWord implements VocabService.
-func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
-	userId, err := v.AuthenticationService.GetUserId(createWordRequest.Token)
+func (s *ServiceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(createWordRequest.Token)
 	if err != nil {
 		return err
 	}
@@ -40,7 +39,7 @@ func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordReques
 		UserId:     userId,
 	}
 
-	err = v.WordRepository.Save(newWord)
+	err = s.Repository.Save(newWord)
 	if err != nil {
 		return err
 	}
@@ -48,15 +47,14 @@ func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordReques
 	return nil
 }
 
-// DeleteWord implements VocabService.
-func (v *VocabServiceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) error {
-	userId, err := v.AuthenticationService.GetUserId(deleteWordRequest.Token)
+func (s *ServiceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(deleteWordRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	if isOwner := v.WordRepository.IsOwnerOfWord(userId, deleteWordRequest.WordId); isOwner {
-		v.WordRepository.Delete(deleteWordRequest.WordId)
+	if isOwner := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId); isOwner {
+		s.Repository.Delete(deleteWordRequest.WordId)
 	} else {
 		return errors.New("you are not allowed to delete the word")
 	}
@@ -64,9 +62,8 @@ func (v *VocabServiceImpl) DeleteWord(deleteWordRequest request.DeleteWordReques
 	return nil
 }
 
-// FindWord implements VocabService.
-func (v *VocabServiceImpl) FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error) {
-	word, err := v.WordRepository.FindById(findWordRequest.WordId)
+func (s *ServiceImpl) FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error) {
+	word, err := s.Repository.FindById(findWordRequest.WordId)
 	if err != nil {
 		return response.VocabResponse{}, err
 	}
@@ -84,16 +81,15 @@ func (v *VocabServiceImpl) FindWord(findWordRequest request.FindWordRequest) (re
 	}, nil
 }
 
-// GetWords implements VocabService.
-func (v *VocabServiceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error) {
-	userId, err := v.AuthenticationService.GetUserId(vocabRequest.Token)
+func (s *ServiceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error) {
+	userId, err := s.AuthenticationService.GetUserId(vocabRequest.Token)
 	if err != nil {
 		return nil, err
 	}
 
 	var vocabResponse []response.VocabResponse
 
-	words, words_err := v.WordRepository.FindByUserId(userId)
+	words, words_err := s.Repository.FindByUserId(userId)
 	if words_err != nil {
 		return nil, words_err
 	}
@@ -115,18 +111,17 @@ func (v *VocabServiceImpl) GetWords(vocabRequest request.VocabRequest) ([]respon
 	return vocabResponse, nil
 }
 
-// ManageTrainings implements VocabService.
-func (v *VocabServiceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error {
-	userId, err := v.AuthenticationService.GetUserId(manageTrainingsRequest.Token)
+func (s *ServiceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(manageTrainingsRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	if isOwner := v.WordRepository.IsOwnerOfWord(userId, manageTrainingsRequest.WordId); !isOwner {
+	if isOwner := s.Repository.IsOwnerOfWord(userId, manageTrainingsRequest.WordId); !isOwner {
 		return errors.New("you are not allowed to manage trainings for this word")
 	}
 
-	err_mt := v.WordRepository.ManageTrainings(
+	err_mt := s.Repository.ManageTrainings(
 		manageTrainingsRequest.TrainingResult,
 		manageTrainingsRequest.Training,
 		manageTrainingsRequest.WordId,
@@ -139,9 +134,8 @@ func (v *VocabServiceImpl) ManageTrainings(manageTrainingsRequest request.Manage
 	return nil
 }
 
-// UpdateWord implements VocabService.
-func (v *VocabServiceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
-	userId, err := v.AuthenticationService.GetUserId(updateWordRequest.Token)
+func (s *ServiceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(updateWordRequest.Token)
 	if err != nil {
 		return err
 	}
@@ -152,8 +146,8 @@ func (v *VocabServiceImpl) UpdateWord(updateWordRequest request.UpdateWordReques
 		UserId:     userId,
 	}
 
-	if isOwner := v.WordRepository.IsOwnerOfWord(userId, updateWordRequest.WordId); isOwner {
-		err = v.WordRepository.Update(updatedWord)
+	if isOwner := s.Repository.IsOwnerOfWord(userId, updateWordRequest.WordId); isOwner {
+		err = s.Repository.Update(updatedWord)
 		if err != nil {
 			return err
 		}
@@ -164,9 +158,8 @@ func (v *VocabServiceImpl) UpdateWord(updateWordRequest request.UpdateWordReques
 	return nil
 }
 
-// UpdateWordStatus implements VocabService.
-func (v *VocabServiceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error {
-	userId, err := v.AuthenticationService.GetUserId(updateWordStatusRequest.Token)
+func (s *ServiceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(updateWordStatusRequest.Token)
 	if err != nil {
 		return err
 	}
@@ -177,8 +170,8 @@ func (v *VocabServiceImpl) UpdateWordStatus(updateWordStatusRequest request.Upda
 		UserId:    userId,
 	}
 
-	if isOwner := v.WordRepository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId); isOwner {
-		err = v.WordRepository.UpdateStatus(updatedWord)
+	if isOwner := s.Repository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId); isOwner {
+		err = s.Repository.UpdateStatus(updatedWord)
 		if err != nil {
 			return err
 		}
