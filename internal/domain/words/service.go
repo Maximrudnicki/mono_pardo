@@ -27,22 +27,6 @@ func NewVocabServiceImpl(
 	}
 }
 
-// AddWordToStudent implements VocabService.
-func (v *VocabServiceImpl) AddWordToStudent(addWordToStudentRequest request.AddWordToStudentRequest) (int, error) {
-	newWord := Word{
-		Word:       addWordToStudentRequest.Word,
-		Definition: addWordToStudentRequest.Definition,
-		UserId:     addWordToStudentRequest.UserId,
-	}
-
-	wordId, err := v.WordRepository.Add(newWord)
-	if err != nil {
-		return 0, err
-	}
-
-	return wordId, nil
-}
-
 // CreateWord implements VocabService.
 func (v *VocabServiceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
 	userId, err := v.AuthenticationService.GetUserId(createWordRequest.Token)

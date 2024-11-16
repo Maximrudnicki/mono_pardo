@@ -13,7 +13,6 @@ type VocabService interface {
 	UpdateWord(updateWordRequest request.UpdateWordRequest) error
 	UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error
 	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
-	AddWordToStudent(addWordToStudentRequest request.AddWordToStudentRequest) (int, error)
 }
 
 type WordRepository interface {
