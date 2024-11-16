@@ -5,7 +5,7 @@ import (
 	"log"
 
 	usersInfra "mono_pardo/internal/infrastructure/users"
-	"mono_pardo/internal/model"
+	"mono_pardo/internal/domain/model"
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
 	"mono_pardo/pkg/data/request"

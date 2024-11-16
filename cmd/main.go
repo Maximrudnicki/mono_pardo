@@ -8,9 +8,9 @@ import (
 	"mono_pardo/internal/controller"
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
-	"mono_pardo/internal/model"
+	"mono_pardo/internal/domain/model"
 	"mono_pardo/internal/router"
-	"mono_pardo/internal/service"
+	"mono_pardo/internal/domain/service"
 	"mono_pardo/pkg/config"
 
 	"github.com/go-playground/validator"

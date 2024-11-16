@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	wordsInfra "mono_pardo/internal/infrastructure/words"
-	"mono_pardo/internal/model"
+	"mono_pardo/internal/domain/model"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 

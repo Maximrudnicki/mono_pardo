@@ -1,6 +1,6 @@
 package words
 
-import "mono_pardo/internal/model"
+import "mono_pardo/internal/domain/model"
 
 type WordRepository interface {
 	Add(word model.Word) (int, error)

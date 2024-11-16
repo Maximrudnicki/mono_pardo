@@ -6,7 +6,7 @@ import (
 
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
-	"mono_pardo/internal/service"
+	"mono_pardo/internal/domain/service"
 
 	"github.com/gin-gonic/gin"
 )

@@ -2,7 +2,7 @@ package users
 
 import (
 	"errors"
-	"mono_pardo/internal/model"
+	"mono_pardo/internal/domain/model"
 
 	"gorm.io/gorm"
 )
