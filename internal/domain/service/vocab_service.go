@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	wordsInfra "mono_pardo/internal/infrastructure/words"
+	"mono_pardo/internal/domain/words"
 	"mono_pardo/internal/domain/model"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
@@ -25,13 +25,13 @@ type VocabService interface {
 type VocabServiceImpl struct {
 	AuthenticationService AuthenticationService
 	Validate              *validator.Validate
-	WordRepository        wordsInfra.WordRepository
+	WordRepository        words.WordRepository
 }
 
 func NewVocabServiceImpl(
 	authenticationService AuthenticationService,
 	validate *validator.Validate,
-	wordRepository wordsInfra.WordRepository) VocabService {
+	wordRepository words.WordRepository) VocabService {
 	return &VocabServiceImpl{
 		AuthenticationService: authenticationService,
 		Validate:              validate,

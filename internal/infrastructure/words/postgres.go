@@ -3,6 +3,7 @@ package words
 import (
 	"errors"
 	"mono_pardo/internal/domain/model"
+	"mono_pardo/internal/domain/words"
 
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ type WordRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) WordRepository {
+func NewPostgresRepositoryImpl(Db *gorm.DB) words.WordRepository {
 	return &WordRepositoryImpl{Db: Db}
 }
 
