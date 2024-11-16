@@ -13,27 +13,27 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type AuthenticationServiceImpl struct {
-	Config         config.Config
-	Validate       *validator.Validate
-	UserRepository UsersRepository
+type ServiceImpl struct {
+	Config     config.Config
+	Validate   *validator.Validate
+	Repository Repository
 }
 
-func NewAuthenticationServiceImpl(
+func NewServiceImpl(
 	config config.Config,
 	validate *validator.Validate,
-	userRepository UsersRepository) AuthenticationService {
-	return &AuthenticationServiceImpl{
-		Config:         config,
-		Validate:       validate,
-		UserRepository: userRepository,
+	repository Repository) Service {
+	return &ServiceImpl{
+		Config:     config,
+		Validate:   validate,
+		Repository: repository,
 	}
 }
 
-// Login implements AuthenticationService.
-func (a *AuthenticationServiceImpl) Login(user request.LoginRequest) (string, error) {
+// Login implements Service.
+func (a *ServiceImpl) Login(user request.LoginRequest) (string, error) {
 	// Find username in database
-	new_user, user_err := a.UserRepository.FindByEmail(user.Email)
+	new_user, user_err := a.Repository.FindByEmail(user.Email)
 	if user_err != nil {
 		return "", user_err
 	}
@@ -52,7 +52,7 @@ func (a *AuthenticationServiceImpl) Login(user request.LoginRequest) (string, er
 }
 
 // Register implements AuthenticationService.
-func (a *AuthenticationServiceImpl) Register(user request.CreateUserRequest) error {
+func (a *ServiceImpl) Register(user request.CreateUserRequest) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (a *AuthenticationServiceImpl) Register(user request.CreateUserRequest) err
 		Password: hashedPassword,
 	}
 
-	save_err := a.UserRepository.Save(newUser)
+	save_err := a.Repository.Save(newUser)
 	if save_err != nil {
 		return save_err
 	}
@@ -72,7 +72,7 @@ func (a *AuthenticationServiceImpl) Register(user request.CreateUserRequest) err
 	return nil
 }
 
-func (a *AuthenticationServiceImpl) GetUserId(token string) (int, error) {
+func (a *ServiceImpl) GetUserId(token string) (int, error) {
 	user, err := utils.ValidateToken(token, a.Config.TokenSecret)
 	if err != nil {
 		return 0, err
@@ -87,8 +87,8 @@ func (a *AuthenticationServiceImpl) GetUserId(token string) (int, error) {
 	return userId, nil
 }
 
-func (a *AuthenticationServiceImpl) FindUser(userId int) (response.UserResponse, error) {
-	user, err := a.UserRepository.FindById(userId)
+func (a *ServiceImpl) FindUser(userId int) (response.UserResponse, error) {
+	user, err := a.Repository.FindById(userId)
 	if err != nil {
 		log.Printf("find user error: %v\n", err)
 		return response.UserResponse{}, err

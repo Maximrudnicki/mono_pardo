@@ -11,13 +11,13 @@ import (
 )
 
 type VocabServiceImpl struct {
-	AuthenticationService usersDomain.AuthenticationService
+	AuthenticationService usersDomain.Service
 	Validate              *validator.Validate
 	WordRepository        WordRepository
 }
 
 func NewVocabServiceImpl(
-	authenticationService usersDomain.AuthenticationService,
+	authenticationService usersDomain.Service,
 	validate *validator.Validate,
 	wordRepository WordRepository) VocabService {
 	return &VocabServiceImpl{

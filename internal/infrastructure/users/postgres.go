@@ -8,17 +8,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type UsersRepositoryImpl struct {
+type RepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) domain.UsersRepository {
-	return &UsersRepositoryImpl{Db: Db}
+func NewPostgresRepositoryImpl(Db *gorm.DB) domain.Repository {
+	return &RepositoryImpl{Db: Db}
 }
 
 // Save implements UsersRepository
-func (u *UsersRepositoryImpl) Save(user domain.User) error {
-	result := u.Db.Create(&user)
+func (r *RepositoryImpl) Save(user domain.User) error {
+	result := r.Db.Create(&user)
 	if result.Error != nil {
 		return errors.New("please use different email")
 	}
@@ -26,18 +26,18 @@ func (u *UsersRepositoryImpl) Save(user domain.User) error {
 }
 
 // Delete implements UsersRepository
-func (u *UsersRepositoryImpl) Delete(usersId int) {
+func (r *RepositoryImpl) Delete(usersId int) {
 	var user domain.User
-	result := u.Db.Where("id = ?", usersId).Delete(&user)
+	result := r.Db.Where("id = ?", usersId).Delete(&user)
 	if result.Error != nil {
 		panic(result.Error)
 	}
 }
 
 // FindAll implements UsersRepository
-func (u *UsersRepositoryImpl) FindAll() []domain.User {
+func (r *RepositoryImpl) FindAll() []domain.User {
 	var user []domain.User
-	results := u.Db.Find(&user)
+	results := r.Db.Find(&user)
 	if results.Error != nil {
 		panic(results.Error)
 	}
@@ -45,9 +45,9 @@ func (u *UsersRepositoryImpl) FindAll() []domain.User {
 }
 
 // FindById implements UsersRepository
-func (u *UsersRepositoryImpl) FindById(userId int) (domain.User, error) {
+func (r *RepositoryImpl) FindById(userId int) (domain.User, error) {
 	var user domain.User
-	result := u.Db.Find(&user, userId)
+	result := r.Db.Find(&user, userId)
 	if result != nil {
 		return user, nil
 	} else {
@@ -56,9 +56,9 @@ func (u *UsersRepositoryImpl) FindById(userId int) (domain.User, error) {
 }
 
 // FindByUsername implements UsersRepository
-func (u *UsersRepositoryImpl) FindByEmail(email string) (domain.User, error) {
+func (r *RepositoryImpl) FindByEmail(email string) (domain.User, error) {
 	var user domain.User
-	result := u.Db.First(&user, "email = ?", email)
+	result := r.Db.First(&user, "email = ?", email)
 
 	if result.Error != nil {
 		return user, errors.New("invalid email or Password")

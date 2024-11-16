@@ -12,10 +12,10 @@ import (
 )
 
 type AuthenticationController struct {
-	authenticationService usersDomain.AuthenticationService
+	authenticationService usersDomain.Service
 }
 
-func NewAuthenticationController(service usersDomain.AuthenticationService) *AuthenticationController {
+func NewAuthenticationController(service usersDomain.Service) *AuthenticationController {
 	return &AuthenticationController{authenticationService: service}
 }
 

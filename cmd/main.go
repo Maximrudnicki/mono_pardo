@@ -43,7 +43,7 @@ func main() {
 	wordRepository := wordsInfra.NewPostgresRepositoryImpl(db)
 
 	//Init Services
-	authenticationService := usersDomain.NewAuthenticationServiceImpl(loadConfig, validate, userRepository)
+	authenticationService := usersDomain.NewServiceImpl(loadConfig, validate, userRepository)
 	vocabService := wordsDomain.NewVocabServiceImpl(authenticationService, validate, wordRepository)
 
 	//Init controllers
