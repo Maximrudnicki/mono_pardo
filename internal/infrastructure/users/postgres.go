@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 	"mono_pardo/internal/domain/model"
+	"mono_pardo/internal/domain/users"
 
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ type UsersRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func NewPostgresRepositoryImpl(Db *gorm.DB) UsersRepository {
+func NewPostgresRepositoryImpl(Db *gorm.DB) users.UsersRepository {
 	return &UsersRepositoryImpl{Db: Db}
 }
 

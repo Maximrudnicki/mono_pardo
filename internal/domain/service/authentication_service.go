@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	usersInfra "mono_pardo/internal/infrastructure/users"
 	"mono_pardo/internal/domain/model"
+	"mono_pardo/internal/domain/users"
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
 	"mono_pardo/pkg/data/request"
@@ -25,13 +25,13 @@ type AuthenticationService interface {
 type AuthenticationServiceImpl struct {
 	Config         config.Config
 	Validate       *validator.Validate
-	UserRepository usersInfra.UsersRepository
+	UserRepository users.UsersRepository
 }
 
 func NewAuthenticationServiceImpl(
 	config config.Config,
 	validate *validator.Validate,
-	userRepository usersInfra.UsersRepository) AuthenticationService {
+	userRepository users.UsersRepository) AuthenticationService {
 	return &AuthenticationServiceImpl{
 		Config:         config,
 		Validate:       validate,
