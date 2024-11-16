@@ -30,10 +30,8 @@ func NewServiceImpl(
 	}
 }
 
-// Login implements Service.
-func (a *ServiceImpl) Login(user request.LoginRequest) (string, error) {
-	// Find username in database
-	new_user, user_err := a.Repository.FindByEmail(user.Email)
+func (s *ServiceImpl) Login(user request.LoginRequest) (string, error) {
+	new_user, user_err := s.Repository.FindByEmail(user.Email)
 	if user_err != nil {
 		return "", user_err
 	}
@@ -43,16 +41,14 @@ func (a *ServiceImpl) Login(user request.LoginRequest) (string, error) {
 		return "", verify_error
 	}
 
-	// Generate Token
-	token, err_token := utils.GenerateToken(a.Config.TokenExpiresIn, new_user.Id, a.Config.TokenSecret)
+	token, err_token := utils.GenerateToken(s.Config.TokenExpiresIn, new_user.Id, s.Config.TokenSecret)
 	if err_token != nil {
 		return "", err_token
 	}
 	return token, nil
 }
 
-// Register implements AuthenticationService.
-func (a *ServiceImpl) Register(user request.CreateUserRequest) error {
+func (s *ServiceImpl) Register(user request.CreateUserRequest) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return err
@@ -64,7 +60,7 @@ func (a *ServiceImpl) Register(user request.CreateUserRequest) error {
 		Password: hashedPassword,
 	}
 
-	save_err := a.Repository.Save(newUser)
+	save_err := s.Repository.Save(newUser)
 	if save_err != nil {
 		return save_err
 	}
@@ -72,8 +68,8 @@ func (a *ServiceImpl) Register(user request.CreateUserRequest) error {
 	return nil
 }
 
-func (a *ServiceImpl) GetUserId(token string) (int, error) {
-	user, err := utils.ValidateToken(token, a.Config.TokenSecret)
+func (s *ServiceImpl) GetUserId(token string) (int, error) {
+	user, err := utils.ValidateToken(token, s.Config.TokenSecret)
 	if err != nil {
 		return 0, err
 	}
@@ -87,8 +83,8 @@ func (a *ServiceImpl) GetUserId(token string) (int, error) {
 	return userId, nil
 }
 
-func (a *ServiceImpl) FindUser(userId int) (response.UserResponse, error) {
-	user, err := a.Repository.FindById(userId)
+func (s *ServiceImpl) FindUser(userId int) (response.UserResponse, error) {
+	user, err := s.Repository.FindById(userId)
 	if err != nil {
 		log.Printf("find user error: %v\n", err)
 		return response.UserResponse{}, err
