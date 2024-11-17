@@ -5,4 +5,4 @@ run: build
 	./bin/mono_pardo
 
 test:
-	go test ./... -count=1
+	go test ./tests/... -count=1
