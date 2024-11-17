@@ -1,5 +1,8 @@
 build:
 	go build -o bin/mono_pardo.exe ./cmd/.
 
-run:
+run: build
 	./bin/mono_pardo
+
+test:
+	go test ./... -count=1
