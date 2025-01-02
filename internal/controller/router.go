@@ -23,10 +23,10 @@ func NewRouter(
 	authenticationRouter.POST("/register", authenticationController.Register)
 
 	vocabRouter := r.Group("/vocab")
-	vocabRouter.GET("/", vocabController.GetWords)
-	vocabRouter.POST("/", vocabController.CreateWord)
+	vocabRouter.GET("", vocabController.GetWords)
+	vocabRouter.POST("", vocabController.CreateWord)
+	vocabRouter.PATCH("", vocabController.UpdateWord)
 	vocabRouter.DELETE("/:wordId", vocabController.DeleteWord)
-	vocabRouter.PATCH("/:wordId", vocabController.UpdateWord)
 	vocabRouter.PATCH("/:wordId/status", vocabController.UpdateWordStatus)
 	vocabRouter.PATCH("/:wordId/trainings", vocabController.ManageTrainings)
 

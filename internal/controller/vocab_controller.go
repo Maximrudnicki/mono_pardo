@@ -124,15 +124,42 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 	token, _ := utils.GetToken(ctx)
 
-	wordId := ctx.Param("wordId")
-	id, err_id := strconv.Atoi(wordId)
+	// wordId := ctx.Param("wordId")
+	// id, err_id := strconv.Atoi(wordId)
 
-	req := request.UpdateWordRequest{
-		Token:  token,
-		WordId: id,
+	var updates map[string]interface{}
+	err := ctx.ShouldBindJSON(&updates)
+
+	// var id int = updates["word_id"].(int)
+	wordIDValue, exists := updates["id"]
+	if !exists {
+		webResponse := response.Response{
+			Code:    http.StatusBadRequest,
+			Status:  "Bad Request",
+			Message: "id is required",
+		}
+		log.Printf("id is required")
+		ctx.JSON(http.StatusBadRequest, webResponse)
+		return
 	}
-	err := ctx.ShouldBindJSON(&req)
-	if err != nil || err_id != nil {
+	var id int
+	switch v := wordIDValue.(type) {
+	case float64:
+		id = int(v)
+	case int:
+		id = v
+	default:
+		webResponse := response.Response{
+			Code:    http.StatusBadRequest,
+			Status:  "Bad Request",
+			Message: "word_id must be a number",
+		}
+		log.Printf("word_id must be a number")
+		ctx.JSON(http.StatusBadRequest, webResponse)
+		return
+	}
+
+	if err != nil {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,
 			Status:  "Bad Request",
@@ -143,7 +170,7 @@ func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 		return
 	}
 
-	err_uw := controller.vocabService.UpdateWord(req)
+	err_uw := controller.vocabService.UpdateWord(token, id, updates)
 	if err_uw != nil {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,

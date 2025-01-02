@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type ServiceImpl struct {
+type serviceImpl struct {
 	AuthenticationService usersDomain.Service
 	Validate              *validator.Validate
 	Repository            Repository
@@ -20,14 +20,14 @@ func NewServiceImpl(
 	authenticationService usersDomain.Service,
 	validate *validator.Validate,
 	repository Repository) Service {
-	return &ServiceImpl{
+	return &serviceImpl{
 		AuthenticationService: authenticationService,
 		Validate:              validate,
 		Repository:            repository,
 	}
 }
 
-func (s *ServiceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
+func (s *serviceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
 	userId, err := s.AuthenticationService.GetUserId(createWordRequest.Token)
 	if err != nil {
 		return err
@@ -47,13 +47,18 @@ func (s *ServiceImpl) CreateWord(createWordRequest request.CreateWordRequest) er
 	return nil
 }
 
-func (s *ServiceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) error {
+func (s *serviceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) error {
 	userId, err := s.AuthenticationService.GetUserId(deleteWordRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	if isOwner := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId); isOwner {
+	isOwner, err := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId)
+	if err != nil {
+		return errors.New("cannot check who is owner of the word")
+	}
+
+	if isOwner {
 		s.Repository.Delete(deleteWordRequest.WordId)
 	} else {
 		return errors.New("you are not allowed to delete the word")
@@ -62,7 +67,7 @@ func (s *ServiceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) er
 	return nil
 }
 
-func (s *ServiceImpl) FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error) {
+func (s *serviceImpl) FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error) {
 	word, err := s.Repository.FindById(findWordRequest.WordId)
 	if err != nil {
 		return response.VocabResponse{}, err
@@ -81,7 +86,7 @@ func (s *ServiceImpl) FindWord(findWordRequest request.FindWordRequest) (respons
 	}, nil
 }
 
-func (s *ServiceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error) {
+func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error) {
 	userId, err := s.AuthenticationService.GetUserId(vocabRequest.Token)
 	if err != nil {
 		return nil, err
@@ -111,13 +116,18 @@ func (s *ServiceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 	return vocabResponse, nil
 }
 
-func (s *ServiceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error {
+func (s *serviceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error {
 	userId, err := s.AuthenticationService.GetUserId(manageTrainingsRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	if isOwner := s.Repository.IsOwnerOfWord(userId, manageTrainingsRequest.WordId); !isOwner {
+	isOwner, err := s.Repository.IsOwnerOfWord(userId, manageTrainingsRequest.WordId)
+	if err != nil {
+		return errors.New("cannot check who is owner of the word")
+	}
+
+	if !isOwner {
 		return errors.New("you are not allowed to manage trainings for this word")
 	}
 
@@ -134,20 +144,19 @@ func (s *ServiceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrain
 	return nil
 }
 
-func (s *ServiceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(updateWordRequest.Token)
+func (s *serviceImpl) UpdateWord(token string, wordId int, updates map[string]interface{}) error {
+	userId, err := s.AuthenticationService.GetUserId(token)
 	if err != nil {
 		return err
 	}
 
-	updatedWord := Word{
-		Id:         updateWordRequest.WordId,
-		Definition: updateWordRequest.Definition,
-		UserId:     userId,
+	isOwner, err := s.Repository.IsOwnerOfWord(userId, wordId)
+	if err != nil {
+		return errors.New("cannot check who is owner of the word")
 	}
 
-	if isOwner := s.Repository.IsOwnerOfWord(userId, updateWordRequest.WordId); isOwner {
-		err = s.Repository.Update(updatedWord)
+	if isOwner {
+		err = s.Repository.Update(wordId, updates)
 		if err != nil {
 			return err
 		}
@@ -158,20 +167,23 @@ func (s *ServiceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) er
 	return nil
 }
 
-func (s *ServiceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error {
+func (s *serviceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error {
 	userId, err := s.AuthenticationService.GetUserId(updateWordStatusRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	updatedWord := Word{
-		Id:        updateWordStatusRequest.WordId,
-		IsLearned: updateWordStatusRequest.IsLearned,
-		UserId:    userId,
+	updatedWord := map[string]interface{}{
+		"is_learned": updateWordStatusRequest.IsLearned,
 	}
 
-	if isOwner := s.Repository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId); isOwner {
-		err = s.Repository.UpdateStatus(updatedWord)
+	isOwner, err := s.Repository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId)
+	if err != nil {
+		return errors.New("cannot check who is owner of the word")
+	}
+
+	if isOwner {
+		err = s.Repository.Update(updateWordStatusRequest.WordId, updatedWord)
 		if err != nil {
 			return err
 		}
