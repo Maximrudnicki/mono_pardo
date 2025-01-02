@@ -124,37 +124,9 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 	token, _ := utils.GetToken(ctx)
 
-	var updates map[string]interface{}
+	var updates []map[string]interface{}
+
 	err := ctx.ShouldBindJSON(&updates)
-
-	wordIDValue, exists := updates["id"]
-	if !exists {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "id is required",
-		}
-		log.Printf("id is required")
-		ctx.JSON(http.StatusBadRequest, webResponse)
-		return
-	}
-	var id int
-	switch v := wordIDValue.(type) {
-	case float64:
-		id = int(v)
-	case int:
-		id = v
-	default:
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "word_id must be a number",
-		}
-		log.Printf("word_id must be a number")
-		ctx.JSON(http.StatusBadRequest, webResponse)
-		return
-	}
-
 	if err != nil {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,
@@ -166,16 +138,59 @@ func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 		return
 	}
 
-	err_uw := controller.vocabService.UpdateWord(token, id, updates)
-	if err_uw != nil {
+	if len(updates) == 0 {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,
 			Status:  "Bad Request",
-			Message: "Cannot update word",
+			Message: "No updates provided",
 		}
-		log.Printf("Cannot update: %v", err_uw)
+		log.Printf("No updates provided")
 		ctx.JSON(http.StatusBadRequest, webResponse)
 		return
+	}
+
+	for _, update := range updates {
+		idValue, exists := update["id"]
+		if !exists {
+			webResponse := response.Response{
+				Code:    http.StatusBadRequest,
+				Status:  "Bad Request",
+				Message: "id is required",
+			}
+			log.Printf("id is required")
+			ctx.JSON(http.StatusBadRequest, webResponse)
+			return
+		}
+		var id int
+		switch v := idValue.(type) {
+		case float64:
+			id = int(v)
+		case int:
+			id = v
+		default:
+			webResponse := response.Response{
+				Code:    http.StatusBadRequest,
+				Status:  "Bad Request",
+				Message: "word_id must be a number",
+			}
+			log.Printf("word_id must be a number")
+			ctx.JSON(http.StatusBadRequest, webResponse)
+			return
+		}
+
+		delete(update, "id")
+
+		err_uw := controller.vocabService.UpdateWord(token, id, update)
+		if err_uw != nil {
+			webResponse := response.Response{
+				Code:    http.StatusBadRequest,
+				Status:  "Bad Request",
+				Message: "Cannot update word",
+			}
+			log.Printf("Cannot update: %v", err_uw)
+			ctx.JSON(http.StatusBadRequest, webResponse)
+			return
+		}
 	}
 
 	webResponse := response.Response{
