@@ -144,24 +144,26 @@ func (s *serviceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrain
 	return nil
 }
 
-func (s *serviceImpl) UpdateWord(token string, wordId int, updates map[string]interface{}) error {
-	userId, err := s.AuthenticationService.GetUserId(token)
+func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
+	userId, err := s.AuthenticationService.GetUserId(updateWordRequest.Token)
 	if err != nil {
 		return err
 	}
 
-	isOwner, err := s.Repository.IsOwnerOfWord(userId, wordId)
-	if err != nil {
-		return errors.New("cannot check who is owner of the word")
-	}
-
-	if isOwner {
-		err = s.Repository.Update(wordId, updates)
+	for _, word := range updateWordRequest.Words {
+		isOwner, err := s.Repository.IsOwnerOfWord(userId, word.WordId)
 		if err != nil {
-			return err
+			return errors.New("cannot check who is owner of the word")
 		}
-	} else {
-		return errors.New("you are not allowed to update the word")
+
+		if isOwner {
+			err = s.Repository.Update(word)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("you are not allowed to update the word")
+		}
 	}
 
 	return nil
@@ -173,8 +175,10 @@ func (s *serviceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWor
 		return err
 	}
 
-	updatedWord := map[string]interface{}{
-		"is_learned": updateWordStatusRequest.IsLearned,
+	updatedWord := Word{
+		Id:        updateWordStatusRequest.WordId,
+		IsLearned: updateWordStatusRequest.IsLearned,
+		UserId:    userId,
 	}
 
 	isOwner, err := s.Repository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId)
@@ -183,7 +187,7 @@ func (s *serviceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWor
 	}
 
 	if isOwner {
-		err = s.Repository.Update(updateWordStatusRequest.WordId, updatedWord)
+		err = s.Repository.UpdateStatus(updatedWord)
 		if err != nil {
 			return err
 		}

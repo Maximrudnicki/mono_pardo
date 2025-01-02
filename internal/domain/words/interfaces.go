@@ -10,7 +10,9 @@ type Service interface {
 	DeleteWord(deleteWordRequest request.DeleteWordRequest) error
 	GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error)
 	FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error)
-	UpdateWord(token string, wordId int, updates map[string]interface{}) error // replace with PATCH-like method
+
+	// At the moment, we don't handle status change in case of all trainings are true
+	UpdateWord(updateWordRequest request.UpdateWordRequest) error
 	UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error
 	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
 }
@@ -18,7 +20,8 @@ type Service interface {
 type Repository interface {
 	// Add(word Word) (int, error)
 	Save(word Word) error
-	Update(wordId int, updates map[string]interface{}) error
+	Update(word request.WordUpdate) error
+	UpdateStatus(word Word) error
 	Delete(wordId int)
 	FindByUserId(userId int) ([]Word, error)
 	FindById(wordId int) (Word, error)

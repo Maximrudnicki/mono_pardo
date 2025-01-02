@@ -21,16 +21,16 @@ type VocabRequest struct {
 }
 
 type UpdateWordRequest struct {
-	Token string          `json:"token"`
-	Words []WordsToUpdate `json:"words"`
+	Token string       `json:"token"`
+	Words []WordUpdate `json:"words"`
 }
 
-type WordsToUpdate struct {
-	WordId  int           `json:"word_id"`
-	Updates []UpdateField `json:"updates"`
+type WordUpdate struct {
+	WordId  int           `json:"id"`
+	Updates []FieldUpdate `json:"updates"`
 }
 
-type UpdateField struct {
+type FieldUpdate struct {
 	Field string      `json:"field"`
 	Value interface{} `json:"value"`
 }

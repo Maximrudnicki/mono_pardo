@@ -2,7 +2,7 @@ package api
 
 import (
 	"mono_pardo/internal/api/controller"
-	"mono_pardo/internal/middleware"
+	"mono_pardo/internal/api/middleware"
 
 	"github.com/gin-gonic/gin"
 )

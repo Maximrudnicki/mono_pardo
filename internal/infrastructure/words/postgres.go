@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	domain "mono_pardo/internal/domain/words"
+	"mono_pardo/internal/utils"
+	"mono_pardo/pkg/data/request"
 
 	"gorm.io/gorm"
 )
@@ -54,14 +56,12 @@ func (r *repositoryImpl) Save(word domain.Word) error {
 	return nil
 }
 
-func (r *repositoryImpl) Update(wordId int, updates map[string]interface{}) error {
+func (r *repositoryImpl) Update(wordUpdate request.WordUpdate) error {
 	var word domain.Word
 
-	if len(updates) == 0 {
-		return nil
-	}
+	updateMap := utils.ConvertFieldUpdatesToMap(wordUpdate.Updates)
 
-	result := r.Db.Model(&word).Where("id = ?", wordId).Updates(updates)
+	result := r.Db.Model(&word).Where("id = ?", wordUpdate.WordId).Updates(updateMap)
 	if result.Error != nil {
 		return errors.New("cannot update word")
 	}
@@ -120,10 +120,10 @@ func (r *repositoryImpl) ManageTrainings(res bool, training string, wordId int) 
 	return nil
 }
 
-// func (r *repositoryImpl) UpdateStatus(word domain.Word) error {
-// 	result := r.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
-// 	if result.Error != nil {
-// 		return errors.New("cannot update status")
-// 	}
-// 	return nil
-// }
+func (r *repositoryImpl) UpdateStatus(word domain.Word) error {
+	result := r.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
+	if result.Error != nil {
+		return errors.New("cannot update status")
+	}
+	return nil
+}
