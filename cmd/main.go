@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"mono_pardo/internal/controller"
+	"mono_pardo/internal/api"
+	"mono_pardo/internal/api/controller"
 	usersDomain "mono_pardo/internal/domain/users"
 	wordsDomain "mono_pardo/internal/domain/words"
 	usersInfra "mono_pardo/internal/infrastructure/users"
@@ -49,7 +50,7 @@ func main() {
 	authenticationController := controller.NewAuthenticationController(authenticationService)
 	vocabController := controller.NewVocabController(vocabService)
 
-	router := controller.NewRouter(authenticationController, vocabController)
+	router := api.NewRouter(authenticationController, vocabController)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{loadConfig.ALLOWED_ORIGINS},

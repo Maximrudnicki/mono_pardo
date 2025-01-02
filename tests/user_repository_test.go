@@ -8,9 +8,9 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"mono_pardo/pkg/config"
 	domain "mono_pardo/internal/domain/users"
 	repository "mono_pardo/internal/infrastructure/users"
+	"mono_pardo/pkg/config"
 )
 
 func TestUserRepository(t *testing.T) {

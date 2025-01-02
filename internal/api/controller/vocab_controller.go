@@ -124,13 +124,9 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 	token, _ := utils.GetToken(ctx)
 
-	// wordId := ctx.Param("wordId")
-	// id, err_id := strconv.Atoi(wordId)
-
 	var updates map[string]interface{}
 	err := ctx.ShouldBindJSON(&updates)
 
-	// var id int = updates["word_id"].(int)
 	wordIDValue, exists := updates["id"]
 	if !exists {
 		webResponse := response.Response{

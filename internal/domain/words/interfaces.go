@@ -10,7 +10,7 @@ type Service interface {
 	DeleteWord(deleteWordRequest request.DeleteWordRequest) error
 	GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error)
 	FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error)
-	UpdateWord(token string, wordId int, updates map[string]interface{}) error  // replace with PATCH-like method
+	UpdateWord(token string, wordId int, updates map[string]interface{}) error // replace with PATCH-like method
 	UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error
 	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
 }
