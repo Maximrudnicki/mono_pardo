@@ -6,3 +6,6 @@ run: build
 
 test:
 	go test ./tests/... -count=1
+
+profile:
+	go test ./tests/... -count=1 -cpuprofile cpu.prof -memprofile mem.prof

@@ -1,33 +1,21 @@
 package tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 
 	domain "mono_pardo/internal/domain/users"
 	repository "mono_pardo/internal/infrastructure/users"
-	"mono_pardo/pkg/config"
 )
 
 func TestUserRepository(t *testing.T) {
-	lc, err := config.LoadConfig("..")
-	if err != nil {
-		t.Fatalf("🚀 Could not load environment variables: %v", err)
-	}
+	env := NewTestEnv(t)
+	defer env.Cleanup(t)
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		lc.DBHost, lc.DBPort, lc.DBUsername, lc.DBPassword, lc.DBTestName)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		t.Fatal("Failed to connect to the database:", err)
-	}
-	db.AutoMigrate(&domain.User{})
+	env.RunMigrations(t)
 
-	userRepository := repository.NewPostgresRepositoryImpl(db)
+	userRepository := repository.NewPostgresRepositoryImpl(env.DB.DB)
 
 	testUser := domain.User{
 		Id:       1,
@@ -71,6 +59,4 @@ func TestUserRepository(t *testing.T) {
 		_, err := userRepository.FindByEmail(testUser.Email)
 		assert.Error(t, err, "Expected error while finding the user by Email")
 	})
-
-	db.Migrator().DropTable(&domain.User{})
 }
