@@ -86,11 +86,3 @@ func (r *repositoryImpl) IsOwnerOfWord(userId int, wordId int) (bool, error) {
 // 	}
 // 	return word.Id, nil
 // }
-
-func (r *repositoryImpl) UpdateStatus(word domain.Word) error {
-	result := r.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
-	if result.Error != nil {
-		return errors.New("cannot update status")
-	}
-	return nil
-}

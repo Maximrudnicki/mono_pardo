@@ -28,7 +28,6 @@ func NewRouter(
 	vocabRouter.POST("", vocabController.CreateWord)
 	vocabRouter.PATCH("", vocabController.UpdateWord)
 	vocabRouter.DELETE("/:wordId", vocabController.DeleteWord)
-	vocabRouter.PATCH("/:wordId/status", vocabController.UpdateWordStatus)
 
 	return router
 }

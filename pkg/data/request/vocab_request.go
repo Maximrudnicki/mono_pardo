@@ -34,9 +34,3 @@ type FieldUpdate struct {
 	Field string      `json:"field"`
 	Value interface{} `json:"value"`
 }
-
-type UpdateWordStatusRequest struct {
-	Token     string `json:"token"`
-	WordId    int    `json:"word_id"`
-	IsLearned bool   `json:"is_learned"`
-}

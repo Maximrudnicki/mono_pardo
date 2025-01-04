@@ -2,6 +2,7 @@ package words
 
 import (
 	"errors"
+	"fmt"
 
 	usersDomain "mono_pardo/internal/domain/users"
 	"mono_pardo/pkg/data/request"
@@ -122,49 +123,51 @@ func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) er
 		return err
 	}
 
+	trainingFields := map[string]bool{"cards": true, "constructor": true, "word_translation": true, "word_audio": true}
+
 	for _, word := range updateWordRequest.Words {
-		isOwner, err := s.Repository.IsOwnerOfWord(userId, word.WordId)
-		if err != nil {
-			return errors.New("cannot check who is owner of the word")
+		if isOwner, err := s.Repository.IsOwnerOfWord(userId, word.WordId); err != nil {
+			return fmt.Errorf("error checking ownership of word ID %d: %w", word.WordId, err)
+		} else if !isOwner {
+			return errors.New("you are not allowed to update the word")
 		}
 
-		if isOwner {
-			err = s.Repository.Update(word)
-			if err != nil {
-				return err
+		if err = s.Repository.Update(word); err != nil {
+			return err
+		}
+
+		for _, update := range word.Updates {
+			if trainingFields[update.Field] {
+				if err = s.updateWordStatus(word.WordId); err != nil {
+					return err
+				}
+				break
 			}
-		} else {
-			return errors.New("you are not allowed to update the word")
 		}
 	}
 
 	return nil
 }
 
-func (s *serviceImpl) UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(updateWordStatusRequest.Token)
+func (s *serviceImpl) updateWordStatus(wordId int) error {
+	word, err := s.Repository.FindById(wordId)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot find word with id: %d", wordId)
 	}
 
-	updatedWord := Word{
-		Id:        updateWordStatusRequest.WordId,
-		IsLearned: updateWordStatusRequest.IsLearned,
-		UserId:    userId,
-	}
+	isLearned := word.Cards && word.WordTranslation && word.Constructor && word.WordAudio
 
-	isOwner, err := s.Repository.IsOwnerOfWord(userId, updateWordStatusRequest.WordId)
-	if err != nil {
-		return errors.New("cannot check who is owner of the word")
-	}
-
-	if isOwner {
-		err = s.Repository.UpdateStatus(updatedWord)
-		if err != nil {
-			return err
+	if word.IsLearned != isLearned {
+		req := request.WordUpdate{
+			WordId: wordId,
+			Updates: []request.FieldUpdate{
+				{Field: "is_learned", Value: isLearned},
+			},
 		}
-	} else {
-		return errors.New("you are not allowed to update the word")
+
+		if err = s.Repository.Update(req); err != nil {
+			return fmt.Errorf("failed to update 'is_learned' status for word ID %d: %w", wordId, err)
+		}
 	}
 
 	return nil
