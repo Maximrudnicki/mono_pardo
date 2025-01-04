@@ -3,7 +3,7 @@ package response
 import "time"
 
 type VocabResponse struct {
-	ID              int       `json:"id"`
+	Id              int       `json:"id"`
 	Word            string    `json:"word"`
 	Definition      string    `json:"definition"`
 	CreatedAt       time.Time `json:"created_at"`

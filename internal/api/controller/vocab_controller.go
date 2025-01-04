@@ -49,14 +49,7 @@ func (controller *VocabController) CreateWord(ctx *gin.Context) {
 		return
 	}
 
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Successfully added!",
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	ctx.Status(http.StatusCreated)
 }
 
 func (controller *VocabController) DeleteWord(ctx *gin.Context) {
@@ -80,45 +73,40 @@ func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, webResponse)
 		return
 	}
-
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Successfully deleted!",
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	
+	ctx.Status(http.StatusOK)
 }
 
 func (controller *VocabController) GetWords(ctx *gin.Context) {
-	token, _ := utils.GetToken(ctx)
+	token, err := utils.GetToken(ctx)
+	if err != nil {
+		webResponse := response.Response{
+			Code:    http.StatusUnauthorized,
+			Status:  "Unauthorized",
+			Message: "Login required",
+		}
+		ctx.JSON(http.StatusUnauthorized, webResponse)
+		return
+	}
 
 	vocabRequest := request.VocabRequest{
 		TokenType: "Bearer",
 		Token:     token,
 	}
 
-	res, err_words := controller.vocabService.GetWords(vocabRequest)
-	if err_words != nil {
+	res, err := controller.vocabService.GetWords(vocabRequest)
+	if err != nil {
 		webResponse := response.Response{
 			Code:    http.StatusBadRequest,
 			Status:  "Bad Request",
 			Message: "Cannot get words",
 		}
-		log.Printf("err_words: %v", err_words)
+		log.Printf("err: %v", err)
 		ctx.JSON(http.StatusBadRequest, webResponse)
 		return
 	}
 
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Successfully got words!",
-		Data:    res,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	ctx.JSON(http.StatusOK, res)
 }
 
 func (controller *VocabController) UpdateWord(ctx *gin.Context) {
@@ -163,14 +151,7 @@ func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 		return
 	}
 
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Successfully updated!",
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	ctx.Status(http.StatusOK)
 }
 
 func (controller *VocabController) UpdateWordStatus(ctx *gin.Context) {
@@ -208,14 +189,7 @@ func (controller *VocabController) UpdateWordStatus(ctx *gin.Context) {
 		return
 	}
 
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Status successfully updated!",
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	ctx.Status(http.StatusOK)
 }
 
 func (controller *VocabController) ManageTrainings(ctx *gin.Context) {
@@ -253,12 +227,5 @@ func (controller *VocabController) ManageTrainings(ctx *gin.Context) {
 		return
 	}
 
-	webResponse := response.Response{
-		Code:    200,
-		Status:  "Ok",
-		Message: "Successfully managed!",
-		Data:    nil,
-	}
-
-	ctx.JSON(http.StatusOK, webResponse)
+	ctx.Status(http.StatusOK)
 }

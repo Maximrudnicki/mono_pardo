@@ -52,7 +52,6 @@ func ValidateToken(token string, signedJWTKey string) (interface{}, error) {
 func GetToken(ctx *gin.Context) (string, error) {
 	authorizationHeader := ctx.GetHeader("Authorization")
 	if authorizationHeader == "" {
-		ctx.JSON(400, gin.H{"error": "Authorization header is missing"})
 		return "", errors.New("authorization header is missing")
 	}
 

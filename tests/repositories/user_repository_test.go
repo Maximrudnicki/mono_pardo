@@ -1,4 +1,4 @@
-package tests
+package repositories_test
 
 import (
 	"testing"
@@ -7,10 +7,11 @@ import (
 
 	domain "mono_pardo/internal/domain/users"
 	repository "mono_pardo/internal/infrastructure/users"
+	"mono_pardo/tests"
 )
 
 func TestUserRepository(t *testing.T) {
-	env := NewTestEnv(t)
+	env := tests.NewTestEnv(t)
 	defer env.Cleanup(t)
 
 	env.RunMigrations(t)

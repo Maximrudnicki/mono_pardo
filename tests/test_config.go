@@ -2,7 +2,9 @@ package tests
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -12,6 +14,8 @@ import (
 	wordsDomain "mono_pardo/internal/domain/words"
 	"mono_pardo/pkg/config"
 )
+
+var uniqueDBName string
 
 // TestDB represents test database configuration and connection
 type TestDB struct {
@@ -42,7 +46,7 @@ func NewTestEnv(t *testing.T) *TestEnv {
 func loadTestConfig(t *testing.T) *config.Config {
 	t.Helper()
 
-	conf, err := config.LoadConfig("..")
+	conf, err := config.LoadConfig("../../.")
 	if err != nil {
 		t.Fatalf("🚀 Could not load environment variables: %v", err)
 	}
@@ -53,6 +57,9 @@ func loadTestConfig(t *testing.T) *config.Config {
 // setupTestDB creates and configures test database
 func setupTestDB(t *testing.T, config *config.Config) *TestDB {
 	t.Helper()
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	uniqueDBName = fmt.Sprintf("%s_%d", config.DBTestName, r.Intn(100000))
 
 	// Connect to postgres for creating test db
 	adminDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable",
@@ -74,19 +81,21 @@ func setupTestDB(t *testing.T, config *config.Config) *TestDB {
 		t.Fatalf("Failed to drop test database: %v", err)
 	}
 
-	_, err = sqlDB.Exec(fmt.Sprintf("CREATE DATABASE %s", config.DBTestName))
+	_, err = sqlDB.Exec(fmt.Sprintf("CREATE DATABASE %s", uniqueDBName))
 	if err != nil {
 		t.Fatalf("Failed to create test database: %v", err)
 	}
 
 	// Connect to Test Database
 	testDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.DBHost, config.DBPort, config.DBUsername, config.DBPassword, config.DBTestName)
+		config.DBHost, config.DBPort, config.DBUsername, config.DBPassword, uniqueDBName)
 
 	testDB, err := gorm.Open(postgres.Open(testDSN), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("Failed to connect to test database: %v", err)
 	}
+
+	config.DBTestName = uniqueDBName
 
 	return &TestDB{DB: testDB}
 }
@@ -163,7 +172,7 @@ func (env *TestEnv) Cleanup(t *testing.T) {
 		return
 	}
 
-	_, err = sqlDB.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", config.DBTestName))
+	_, err = sqlDB.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", uniqueDBName))
 	if err != nil {
 		t.Errorf("Failed to drop test database: %v", err)
 	}

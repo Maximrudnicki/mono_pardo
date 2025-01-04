@@ -8,15 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct {
+type repositoryImpl struct {
 	Db *gorm.DB
 }
 
 func NewPostgresRepositoryImpl(Db *gorm.DB) domain.Repository {
-	return &RepositoryImpl{Db: Db}
+	return &repositoryImpl{Db: Db}
 }
 
-func (r *RepositoryImpl) Save(user domain.User) error {
+func (r *repositoryImpl) Save(user domain.User) error {
 	result := r.Db.Create(&user)
 	if result.Error != nil {
 		return errors.New("please use different email")
@@ -24,7 +24,7 @@ func (r *RepositoryImpl) Save(user domain.User) error {
 	return nil
 }
 
-func (r *RepositoryImpl) Delete(usersId int) {
+func (r *repositoryImpl) Delete(usersId int) {
 	var user domain.User
 	result := r.Db.Where("id = ?", usersId).Delete(&user)
 	if result.Error != nil {
@@ -32,7 +32,7 @@ func (r *RepositoryImpl) Delete(usersId int) {
 	}
 }
 
-func (r *RepositoryImpl) FindAll() []domain.User {
+func (r *repositoryImpl) FindAll() []domain.User {
 	var user []domain.User
 	results := r.Db.Find(&user)
 	if results.Error != nil {
@@ -41,7 +41,7 @@ func (r *RepositoryImpl) FindAll() []domain.User {
 	return user
 }
 
-func (r *RepositoryImpl) FindById(userId int) (domain.User, error) {
+func (r *repositoryImpl) FindById(userId int) (domain.User, error) {
 	var user domain.User
 	result := r.Db.Find(&user, userId)
 	if result != nil {
@@ -51,7 +51,7 @@ func (r *RepositoryImpl) FindById(userId int) (domain.User, error) {
 	}
 }
 
-func (r *RepositoryImpl) FindByEmail(email string) (domain.User, error) {
+func (r *repositoryImpl) FindByEmail(email string) (domain.User, error) {
 	var user domain.User
 	result := r.Db.First(&user, "email = ?", email)
 

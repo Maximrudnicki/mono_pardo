@@ -74,7 +74,7 @@ func (s *serviceImpl) FindWord(findWordRequest request.FindWordRequest) (respons
 	}
 
 	return response.VocabResponse{
-		ID:              word.Id,
+		Id:              word.Id,
 		Word:            word.Word,
 		Definition:      word.Definition,
 		CreatedAt:       word.CreatedAt,
@@ -101,7 +101,7 @@ func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 
 	for _, word := range words {
 		vocabResponse = append(vocabResponse, response.VocabResponse{
-			ID:              word.Id,
+			Id:              word.Id,
 			Word:            word.Word,
 			Definition:      word.Definition,
 			CreatedAt:       word.CreatedAt,

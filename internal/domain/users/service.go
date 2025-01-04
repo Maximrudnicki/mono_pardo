@@ -13,7 +13,7 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type ServiceImpl struct {
+type serviceImpl struct {
 	Config     config.Config
 	Validate   *validator.Validate
 	Repository Repository
@@ -23,14 +23,14 @@ func NewServiceImpl(
 	config config.Config,
 	validate *validator.Validate,
 	repository Repository) Service {
-	return &ServiceImpl{
+	return &serviceImpl{
 		Config:     config,
 		Validate:   validate,
 		Repository: repository,
 	}
 }
 
-func (s *ServiceImpl) Login(user request.LoginRequest) (string, error) {
+func (s *serviceImpl) Login(user request.LoginRequest) (string, error) {
 	new_user, user_err := s.Repository.FindByEmail(user.Email)
 	if user_err != nil {
 		return "", user_err
@@ -48,7 +48,7 @@ func (s *ServiceImpl) Login(user request.LoginRequest) (string, error) {
 	return token, nil
 }
 
-func (s *ServiceImpl) Register(user request.CreateUserRequest) error {
+func (s *serviceImpl) Register(user request.CreateUserRequest) error {
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return err
@@ -68,7 +68,7 @@ func (s *ServiceImpl) Register(user request.CreateUserRequest) error {
 	return nil
 }
 
-func (s *ServiceImpl) GetUserId(token string) (int, error) {
+func (s *serviceImpl) GetUserId(token string) (int, error) {
 	user, err := utils.ValidateToken(token, s.Config.TokenSecret)
 	if err != nil {
 		return 0, err
@@ -83,7 +83,7 @@ func (s *ServiceImpl) GetUserId(token string) (int, error) {
 	return userId, nil
 }
 
-func (s *ServiceImpl) FindUser(userId int) (response.UserResponse, error) {
+func (s *serviceImpl) FindUser(userId int) (response.UserResponse, error) {
 	user, err := s.Repository.FindById(userId)
 	if err != nil {
 		log.Printf("find user error: %v\n", err)
