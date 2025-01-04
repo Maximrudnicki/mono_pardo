@@ -40,10 +40,3 @@ type UpdateWordStatusRequest struct {
 	WordId    int    `json:"word_id"`
 	IsLearned bool   `json:"is_learned"`
 }
-
-type ManageTrainingsRequest struct {
-	Token          string `json:"token"`
-	TrainingResult bool   `json:"result"`
-	Training       string `json:"training"`
-	WordId         int    `json:"word_id"`
-}

@@ -28,6 +28,8 @@ func TestGetVocab(t *testing.T) {
 	mockAuthService.On("GetUserId", "test-token").Return(1, nil)
 	mockAuthService.On("GetUserId", "").Return(0, fmt.Errorf("empty token"))
 
+	createdAt := time.Now()
+
 	fixture := &tests.WordFixture{
 		Words: []wordsDomain.Word{
 			{
@@ -39,7 +41,7 @@ func TestGetVocab(t *testing.T) {
 				Cards:           true,
 				Constructor:     false,
 				WordAudio:       false,
-				CreatedAt:       time.Now(),
+				CreatedAt:       createdAt,
 			},
 			{
 				UserId:          1,
@@ -50,7 +52,7 @@ func TestGetVocab(t *testing.T) {
 				Cards:           true,
 				Constructor:     true,
 				WordAudio:       false,
-				CreatedAt:       time.Now(),
+				CreatedAt:       createdAt,
 			},
 		},
 	}
@@ -94,6 +96,6 @@ func TestGetVocab(t *testing.T) {
 		assert.Equal(t, "hello", words[0].Word)
 		assert.Equal(t, "planet earth", words[1].Definition)
 		assert.Equal(t, false, words[0].IsLearned)
-		assert.Equal(t, false, words[0].WordTranslation)
+		assert.WithinDuration(t, createdAt, words[0].CreatedAt, time.Second)
 	})
 }

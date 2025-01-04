@@ -2,7 +2,7 @@ package words
 
 import (
 	"github.com/stretchr/testify/mock"
-	
+
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 )

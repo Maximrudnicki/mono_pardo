@@ -14,7 +14,6 @@ type Service interface {
 	// At the moment, we don't handle status change in case of all trainings are true
 	UpdateWord(updateWordRequest request.UpdateWordRequest) error
 	UpdateWordStatus(updateWordStatusRequest request.UpdateWordStatusRequest) error
-	ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error
 }
 
 type Repository interface {
@@ -25,7 +24,6 @@ type Repository interface {
 	Delete(wordId int)
 	FindByUserId(userId int) ([]Word, error)
 	FindById(wordId int) (Word, error)
-	ManageTrainings(res bool, training string, wordId int) error
 
 	// utils
 	IsOwnerOfWord(userId int, wordId int) (bool, error)

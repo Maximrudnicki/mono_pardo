@@ -29,7 +29,6 @@ func NewRouter(
 	vocabRouter.PATCH("", vocabController.UpdateWord)
 	vocabRouter.DELETE("/:wordId", vocabController.DeleteWord)
 	vocabRouter.PATCH("/:wordId/status", vocabController.UpdateWordStatus)
-	vocabRouter.PATCH("/:wordId/trainings", vocabController.ManageTrainings)
 
 	return router
 }

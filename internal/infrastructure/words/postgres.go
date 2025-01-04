@@ -87,39 +87,6 @@ func (r *repositoryImpl) IsOwnerOfWord(userId int, wordId int) (bool, error) {
 // 	return word.Id, nil
 // }
 
-func (r *repositoryImpl) ManageTrainings(res bool, training string, wordId int) error {
-	var word domain.Word
-	result := r.Db.Where("id = ?", wordId).Find(&word)
-	if result.Error != nil {
-		return errors.New("cannot find word")
-	}
-
-	switch training {
-	case "cards":
-		word.Cards = res
-	case "word_translation":
-		word.WordTranslation = res
-	case "constructor":
-		word.Constructor = res
-	case "word_audio":
-		word.WordAudio = res
-	default:
-		return errors.New("unknow training")
-	}
-
-	if word.Cards && word.WordTranslation && word.Constructor && word.WordAudio {
-		word.IsLearned = true
-	} else {
-		word.IsLearned = false
-	}
-
-	result = r.Db.Save(&word)
-	if result.Error != nil {
-		return errors.New("cannot save word")
-	}
-	return nil
-}
-
 func (r *repositoryImpl) UpdateStatus(word domain.Word) error {
 	result := r.Db.Model(&word).Where("id = ?", word.Id).Update("is_learned", word.IsLearned)
 	if result.Error != nil {

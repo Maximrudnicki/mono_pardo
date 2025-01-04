@@ -116,34 +116,6 @@ func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 	return vocabResponse, nil
 }
 
-func (s *serviceImpl) ManageTrainings(manageTrainingsRequest request.ManageTrainingsRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(manageTrainingsRequest.Token)
-	if err != nil {
-		return err
-	}
-
-	isOwner, err := s.Repository.IsOwnerOfWord(userId, manageTrainingsRequest.WordId)
-	if err != nil {
-		return errors.New("cannot check who is owner of the word")
-	}
-
-	if !isOwner {
-		return errors.New("you are not allowed to manage trainings for this word")
-	}
-
-	err_mt := s.Repository.ManageTrainings(
-		manageTrainingsRequest.TrainingResult,
-		manageTrainingsRequest.Training,
-		manageTrainingsRequest.WordId,
-	)
-
-	if err_mt != nil {
-		return err_mt
-	}
-
-	return nil
-}
-
 func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
 	userId, err := s.AuthenticationService.GetUserId(updateWordRequest.Token)
 	if err != nil {

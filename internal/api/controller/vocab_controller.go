@@ -73,7 +73,7 @@ func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, webResponse)
 		return
 	}
-	
+
 	ctx.Status(http.StatusOK)
 }
 
@@ -185,44 +185,6 @@ func (controller *VocabController) UpdateWordStatus(ctx *gin.Context) {
 			Message: "Cannot update status",
 		}
 		log.Printf("Cannot update status: %v", err_uws)
-		ctx.JSON(http.StatusBadRequest, webResponse)
-		return
-	}
-
-	ctx.Status(http.StatusOK)
-}
-
-func (controller *VocabController) ManageTrainings(ctx *gin.Context) {
-	token, _ := utils.GetToken(ctx)
-
-	wordId := ctx.Param("wordId")
-	id, err_id := strconv.Atoi(wordId)
-
-	req := request.ManageTrainingsRequest{
-		Token:  token,
-		WordId: id,
-	}
-	err := ctx.ShouldBindJSON(&req)
-	if err != nil || err_id != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot manage training",
-		}
-		log.Printf("Cannot bind JSON: %v", err)
-		ctx.JSON(http.StatusBadRequest, webResponse)
-		return
-	}
-
-	err_mt := controller.vocabService.ManageTrainings(req)
-
-	if err_mt != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot manage training",
-		}
-		log.Printf("Cannot manage training: %v", err_mt)
 		ctx.JSON(http.StatusBadRequest, webResponse)
 		return
 	}
