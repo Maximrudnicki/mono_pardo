@@ -2,6 +2,7 @@ package words
 
 import (
 	"errors"
+	"fmt"
 
 	domain "mono_pardo/internal/domain/words"
 	"mono_pardo/internal/utils"
@@ -18,41 +19,42 @@ func NewPostgresRepositoryImpl(Db *gorm.DB) domain.Repository {
 	return &repositoryImpl{Db: Db}
 }
 
-func (r *repositoryImpl) Delete(wordId int) {
+func (r *repositoryImpl) Delete(wordId int) error {
 	var word domain.Word
-	result := r.Db.Where("id = ?", wordId).Delete(&word)
-	if result.Error != nil {
-		panic(result.Error)
+
+	if err := r.Db.Where("id = ?", wordId).Delete(&word).Error; err != nil {
+		return fmt.Errorf("cannot delete word: %d", wordId)
 	}
+
+	return nil
 }
 
 func (r *repositoryImpl) FindByUserId(userId int) ([]domain.Word, error) {
 	var words []domain.Word
-	result := r.Db.Where("user_id = ?", userId).Find(&words)
-	// Should return empty slice in case if user exists.
-	// It's made for case if user exists but have not added any words yet
-	if result != nil {
-		return words, nil
-	} else {
+
+	if err := r.Db.Where("user_id = ?", userId).Find(&words).Error; err != nil {
 		return nil, errors.New("words is not found")
 	}
+
+	// Should return empty slice in case if user exists but have not added any words yet.
+	return words, nil
 }
 
 func (r *repositoryImpl) FindById(wordId int) (domain.Word, error) {
 	var word domain.Word
-	result := r.Db.Where("id = ?", wordId).Find(&word)
-	if result != nil {
-		return word, nil
-	} else {
-		return word, errors.New("word is not found")
+
+	if err := r.Db.Where("id = ?", wordId).Find(&word).Error; err != nil {
+		return word, fmt.Errorf("cannot find word with id: %d", wordId)
 	}
+
+	return word, nil
 }
 
 func (r *repositoryImpl) Save(word domain.Word) error {
-	result := r.Db.Create(&word)
-	if result.Error != nil {
+	if err := r.Db.Create(&word).Error; err != nil {
 		return errors.New("cannot save word")
 	}
+
 	return nil
 }
 
@@ -61,9 +63,9 @@ func (r *repositoryImpl) Update(wordUpdate request.WordUpdate) error {
 
 	updateMap := utils.ConvertFieldUpdatesToMap(wordUpdate.Updates)
 
-	result := r.Db.Model(&word).Where("id = ?", wordUpdate.WordId).Updates(updateMap)
-	if result.Error != nil {
-		return errors.New("cannot update word")
+	err := r.Db.Model(&word).Where("id = ?", wordUpdate.WordId).Updates(updateMap).Error
+	if err != nil {
+		return fmt.Errorf("cannot update word: %d", wordUpdate.WordId)
 	}
 
 	return nil
@@ -71,9 +73,9 @@ func (r *repositoryImpl) Update(wordUpdate request.WordUpdate) error {
 
 func (r *repositoryImpl) IsOwnerOfWord(userId int, wordId int) (bool, error) {
 	var word domain.Word
-	result := r.Db.Where("id = ?", wordId).Find(&word)
-	if result.Error != nil {
-		return false, result.Error
+
+	if err := r.Db.Where("id = ?", wordId).Find(&word).Error; err != nil {
+		return false, fmt.Errorf("cannot check who is owner of the word: %d", wordId)
 	}
 
 	return word.UserId == userId, nil

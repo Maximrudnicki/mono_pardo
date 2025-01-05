@@ -1,7 +1,6 @@
 package words
 
 import (
-	"errors"
 	"fmt"
 
 	usersDomain "mono_pardo/internal/domain/users"
@@ -40,8 +39,7 @@ func (s *serviceImpl) CreateWord(createWordRequest request.CreateWordRequest) er
 		UserId:     userId,
 	}
 
-	err = s.Repository.Save(newWord)
-	if err != nil {
+	if err = s.Repository.Save(newWord); err != nil {
 		return err
 	}
 
@@ -54,15 +52,14 @@ func (s *serviceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) er
 		return err
 	}
 
-	isOwner, err := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId)
-	if err != nil {
-		return errors.New("cannot check who is owner of the word")
+	if isOwner, err := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId); err != nil {
+		return err
+	} else if !isOwner {
+		return fmt.Errorf("you are not allowed to delete the word %d", deleteWordRequest.WordId)
 	}
 
-	if isOwner {
-		s.Repository.Delete(deleteWordRequest.WordId)
-	} else {
-		return errors.New("you are not allowed to delete the word")
+	if err = s.Repository.Delete(deleteWordRequest.WordId); err != nil {
+		return err
 	}
 
 	return nil
@@ -95,9 +92,9 @@ func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 
 	var vocabResponse []response.VocabResponse
 
-	words, words_err := s.Repository.FindByUserId(userId)
-	if words_err != nil {
-		return nil, words_err
+	words, err := s.Repository.FindByUserId(userId)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, word := range words {
@@ -127,9 +124,9 @@ func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) er
 
 	for _, word := range updateWordRequest.Words {
 		if isOwner, err := s.Repository.IsOwnerOfWord(userId, word.WordId); err != nil {
-			return fmt.Errorf("error checking ownership of word ID %d: %w", word.WordId, err)
+			return err
 		} else if !isOwner {
-			return errors.New("you are not allowed to update the word")
+			return fmt.Errorf("you are not allowed to update the word: %d", word.WordId)
 		}
 
 		if err = s.Repository.Update(word); err != nil {
@@ -152,7 +149,7 @@ func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) er
 func (s *serviceImpl) updateWordStatus(wordId int) error {
 	word, err := s.Repository.FindById(wordId)
 	if err != nil {
-		return fmt.Errorf("cannot find word with id: %d", wordId)
+		return err
 	}
 
 	isLearned := word.Cards && word.WordTranslation && word.Constructor && word.WordAudio
@@ -166,7 +163,7 @@ func (s *serviceImpl) updateWordStatus(wordId int) error {
 		}
 
 		if err = s.Repository.Update(req); err != nil {
-			return fmt.Errorf("failed to update 'is_learned' status for word ID %d: %w", wordId, err)
+			return fmt.Errorf("failed to update 'is_learned' status for word ID %d", wordId)
 		}
 	}
 

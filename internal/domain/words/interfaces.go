@@ -18,7 +18,7 @@ type Repository interface {
 	// Add(word Word) (int, error)
 	Save(word Word) error
 	Update(word request.WordUpdate) error
-	Delete(wordId int)
+	Delete(wordId int) error
 	FindByUserId(userId int) ([]Word, error)
 	FindById(wordId int) (Word, error)
 

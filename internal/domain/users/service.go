@@ -74,10 +74,10 @@ func (s *serviceImpl) GetUserId(token string) (int, error) {
 		return 0, err
 	}
 
-	userId, err_id := strconv.Atoi(fmt.Sprint(user))
+	userId, err := strconv.Atoi(fmt.Sprint(user))
 
-	if err_id != nil {
-		log.Printf("Failed to get id: %v\n", err_id)
+	if err != nil {
+		fmt.Errorf("failed to get id: %w\n", err)
 	}
 
 	return userId, nil
