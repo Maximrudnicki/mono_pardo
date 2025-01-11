@@ -34,7 +34,7 @@ func (controller *VocabController) CreateWord(ctx *gin.Context) {
 	}
 
 	if err := controller.vocabService.CreateWord(req); err != nil {
-		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot add word")
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
 		return
 	}
 
@@ -44,7 +44,7 @@ func (controller *VocabController) CreateWord(ctx *gin.Context) {
 func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 	token, err := utils.GetToken(ctx)
 	if err != nil {
-		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, err.Error())
+		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, "Login required")
 		return
 	}
 
@@ -61,7 +61,7 @@ func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 	}
 
 	if err = controller.vocabService.DeleteWord(req); err != nil {
-		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot delete word")
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
 		return
 	}
 
@@ -82,7 +82,7 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 
 	res, err := controller.vocabService.GetWords(vocabRequest)
 	if err != nil {
-		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot get words")
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
 		return
 	}
 

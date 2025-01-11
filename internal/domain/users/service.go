@@ -1,6 +1,7 @@
 package users
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -69,7 +70,7 @@ func (s *serviceImpl) Register(user request.CreateUserRequest) error {
 func (s *serviceImpl) GetUserId(token string) (int, error) {
 	user, err := utils.ValidateToken(token, s.Config.TokenSecret)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("cannot validate token")
 	}
 
 	userId, err := strconv.Atoi(fmt.Sprint(user))
