@@ -1,51 +1,40 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
+	"mono_pardo/internal/api/errors"
 	wordsDomain "mono_pardo/internal/domain/words"
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/data/request"
-	"mono_pardo/pkg/data/response"
 
 	"github.com/gin-gonic/gin"
 )
 
 type VocabController struct {
+	BaseController
 	vocabService wordsDomain.Service
 }
 
 func NewVocabController(service wordsDomain.Service) *VocabController {
-	return &VocabController{vocabService: service}
+	return &VocabController{BaseController: BaseController{}, vocabService: service}
 }
 
 func (controller *VocabController) CreateWord(ctx *gin.Context) {
-	token, _ := utils.GetToken(ctx)
-
-	req := request.CreateWordRequest{Token: token}
-	err := ctx.ShouldBindJSON(&req)
+	token, err := utils.GetToken(ctx)
 	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot add word",
-		}
-		log.Printf("Cannot bind JSON: %v", err)
-		ctx.JSON(http.StatusBadRequest, webResponse)
+		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, "Login required")
 		return
 	}
 
-	err_cw := controller.vocabService.CreateWord(req)
-	if err_cw != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot add word",
-		}
-		log.Printf("Cannot add: %v", err_cw)
-		ctx.JSON(http.StatusBadRequest, webResponse)
+	req := request.CreateWordRequest{Token: token}
+	if !controller.BindJSON(ctx, &req) {
+		return
+	}
+
+	if err := controller.vocabService.CreateWord(req); err != nil {
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot add word")
 		return
 	}
 
@@ -53,24 +42,26 @@ func (controller *VocabController) CreateWord(ctx *gin.Context) {
 }
 
 func (controller *VocabController) DeleteWord(ctx *gin.Context) {
-	token, _ := utils.GetToken(ctx)
+	token, err := utils.GetToken(ctx)
+	if err != nil {
+		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, err.Error())
+		return
+	}
 
 	wordId := ctx.Param("wordId")
-	id, err_id := strconv.Atoi(wordId)
+	id, err := strconv.Atoi(wordId)
+	if err != nil {
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot parse id from url")
+		return
+	}
 
 	req := request.DeleteWordRequest{
 		Token:  token,
 		WordId: id,
 	}
 
-	err_dw := controller.vocabService.DeleteWord(req)
-	if err_dw != nil || err_id != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot delete word",
-		}
-		ctx.JSON(http.StatusBadRequest, webResponse)
+	if err = controller.vocabService.DeleteWord(req); err != nil {
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot delete word")
 		return
 	}
 
@@ -80,12 +71,7 @@ func (controller *VocabController) DeleteWord(ctx *gin.Context) {
 func (controller *VocabController) GetWords(ctx *gin.Context) {
 	token, err := utils.GetToken(ctx)
 	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusUnauthorized,
-			Status:  "Unauthorized",
-			Message: "Login required",
-		}
-		ctx.JSON(http.StatusUnauthorized, webResponse)
+		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, "Login required")
 		return
 	}
 
@@ -96,13 +82,7 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 
 	res, err := controller.vocabService.GetWords(vocabRequest)
 	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot get words",
-		}
-		log.Printf("err: %v", err)
-		ctx.JSON(http.StatusBadRequest, webResponse)
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Cannot get words")
 		return
 	}
 
@@ -110,44 +90,26 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 }
 
 func (controller *VocabController) UpdateWord(ctx *gin.Context) {
-	token, _ := utils.GetToken(ctx)
+	token, err := utils.GetToken(ctx)
+	if err != nil {
+		controller.SendError(ctx, http.StatusUnauthorized, errors.UnauthorizedError, "Login required")
+		return
+	}
 
 	var words []request.WordUpdate
-
-	err := ctx.ShouldBindJSON(&words)
-	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot update word",
-		}
-		log.Printf("Cannot bind JSON: %v", err)
-		ctx.JSON(http.StatusBadRequest, webResponse)
+	if !controller.BindJSON(ctx, &words) {
 		return
 	}
 
 	request := request.UpdateWordRequest{Token: token, Words: words}
 
 	if len(request.Words) == 0 {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "No updates provided",
-		}
-		log.Printf("No updates provided")
-		ctx.JSON(http.StatusBadRequest, webResponse)
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, "No updates provided")
 		return
 	}
 
-	err = controller.vocabService.UpdateWord(request)
-	if err != nil {
-		webResponse := response.Response{
-			Code:    http.StatusBadRequest,
-			Status:  "Bad Request",
-			Message: "Cannot update words",
-		}
-		log.Printf("Cannot update: %v", err)
-		ctx.JSON(http.StatusBadRequest, webResponse)
+	if err := controller.vocabService.UpdateWord(request); err != nil {
+		controller.SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
 		return
 	}
 

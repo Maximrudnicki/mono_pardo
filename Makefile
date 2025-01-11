@@ -4,6 +4,9 @@ build:
 run: build
 	./bin/mono_pardo
 
+fmt:
+	go fmt ./...
+
 test:
 	go test ./tests/... -count=1
 

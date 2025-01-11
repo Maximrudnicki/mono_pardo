@@ -31,19 +31,18 @@ func NewServiceImpl(
 }
 
 func (s *serviceImpl) Login(user request.LoginRequest) (string, error) {
-	new_user, user_err := s.Repository.FindByEmail(user.Email)
-	if user_err != nil {
-		return "", user_err
+	new_user, err := s.Repository.FindByEmail(user.Email)
+	if err != nil {
+		return "", err
 	}
 
-	verify_error := utils.VerifyPassword(new_user.Password, user.Password)
-	if verify_error != nil {
-		return "", verify_error
+	if err = utils.VerifyPassword(new_user.Password, user.Password); err != nil {
+		return "", err
 	}
 
-	token, err_token := utils.GenerateToken(s.Config.TokenExpiresIn, new_user.Id, s.Config.TokenSecret)
-	if err_token != nil {
-		return "", err_token
+	token, err := utils.GenerateToken(s.Config.TokenExpiresIn, new_user.Id, s.Config.TokenSecret)
+	if err != nil {
+		return "", err
 	}
 	return token, nil
 }
@@ -60,9 +59,8 @@ func (s *serviceImpl) Register(user request.CreateUserRequest) error {
 		Password: hashedPassword,
 	}
 
-	save_err := s.Repository.Save(newUser)
-	if save_err != nil {
-		return save_err
+	if err = s.Repository.Save(newUser); err != nil {
+		return err
 	}
 
 	return nil
@@ -75,9 +73,8 @@ func (s *serviceImpl) GetUserId(token string) (int, error) {
 	}
 
 	userId, err := strconv.Atoi(fmt.Sprint(user))
-
 	if err != nil {
-		fmt.Errorf("failed to get id: %w\n", err)
+		return 0, fmt.Errorf("failed to get id: %w\n", err)
 	}
 
 	return userId, nil
