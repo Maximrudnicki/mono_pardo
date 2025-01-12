@@ -14,6 +14,8 @@ func NewRouter(
 
 	router.Use(middleware.LoggerMiddleware())
 
+	authMiddleware := middleware.NewAuthMiddleware(authenticationController.AuthenticationService)
+
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
@@ -23,7 +25,7 @@ func NewRouter(
 	authenticationRouter.POST("/login/", authenticationController.Login)
 	authenticationRouter.POST("/register", authenticationController.Register)
 
-	vocabRouter := r.Group("/vocab")
+	vocabRouter := r.Group("/vocab", authMiddleware.Handle())
 	vocabRouter.GET("", vocabController.GetWords)
 	vocabRouter.POST("", vocabController.CreateWord)
 	vocabRouter.PATCH("", vocabController.UpdateWord)

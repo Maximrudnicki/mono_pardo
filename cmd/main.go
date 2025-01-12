@@ -28,14 +28,12 @@ func main() {
 	//Database
 	db := config.ConnectionDB(&loadConfig)
 
-	db_table_err := db.Table("words").AutoMigrate(&wordsDomain.Word{})
-	if db_table_err != nil {
-		log.Fatalf("Database table error: %v\n", db_table_err)
+	if err = db.Table("words").AutoMigrate(&wordsDomain.Word{}); err != nil {
+		log.Fatalf("Database table error: %v\n", err)
 	}
 
-	db_table_err = db.Table("users").AutoMigrate(&usersDomain.User{})
-	if db_table_err != nil {
-		log.Fatalf("Database table error: %v\n", db_table_err)
+	if err = db.Table("users").AutoMigrate(&usersDomain.User{}); err != nil {
+		log.Fatalf("Database table error: %v\n", err)
 	}
 
 	//Init Repositories
@@ -65,8 +63,8 @@ func main() {
 		Addr:    fmt.Sprintf(":%s", loadConfig.PORT),
 		Handler: handler,
 	}
-	err = server.ListenAndServe()
-	if err != nil {
+
+	if err = server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
