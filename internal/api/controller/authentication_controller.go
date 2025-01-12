@@ -20,12 +20,12 @@ func NewAuthenticationController(service usersDomain.Service) *AuthenticationCon
 }
 
 func (controller *AuthenticationController) Login(ctx *gin.Context) {
-	loginRequest := request.LoginRequest{}
-	if !BindJSON(ctx, &loginRequest) {
+	req := request.LoginRequest{}
+	if !BindJSON(ctx, &req) {
 		return
 	}
 
-	token, err := controller.AuthenticationService.Login(loginRequest)
+	token, err := controller.AuthenticationService.Login(req)
 	if err != nil {
 		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Invalid username or password")
 		return
@@ -40,12 +40,12 @@ func (controller *AuthenticationController) Login(ctx *gin.Context) {
 }
 
 func (controller *AuthenticationController) Register(ctx *gin.Context) {
-	createUserRequest := request.CreateUserRequest{}
-	if !BindJSON(ctx, &createUserRequest) {
+	req := request.CreateUserRequest{}
+	if !BindJSON(ctx, &req) {
 		return
 	}
 
-	if err := controller.AuthenticationService.Register(createUserRequest); err != nil {
+	if err := controller.AuthenticationService.Register(req); err != nil {
 		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "Please use another email address")
 		return
 	}

@@ -69,14 +69,14 @@ func (controller *VocabController) UpdateWord(ctx *gin.Context) {
 		return
 	}
 
-	request := request.UpdateWordRequest{UserId: ctx.GetInt("userId"), Words: words}
+	req := request.UpdateWordRequest{UserId: ctx.GetInt("userId"), Words: words}
 
-	if len(request.Words) == 0 {
+	if len(req.Words) == 0 {
 		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "No updates provided")
 		return
 	}
 
-	if err := controller.vocabService.UpdateWord(request); err != nil {
+	if err := controller.vocabService.UpdateWord(req); err != nil {
 		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
 		return
 	}

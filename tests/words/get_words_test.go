@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"mono_pardo/internal/api/controller"
+	"mono_pardo/internal/api/middleware"
 	wordsDomain "mono_pardo/internal/domain/words"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
 	resp "mono_pardo/pkg/data/response"
@@ -61,11 +62,15 @@ func TestGetVocab(t *testing.T) {
 
 	wordRepository := wordsInfra.NewPostgresRepositoryImpl(env.DB.DB)
 	validate := validator.New()
-	vocabService := wordsDomain.NewServiceImpl(mockAuthService, validate, wordRepository)
+	vocabService := wordsDomain.NewServiceImpl(validate, wordRepository)
 	vocabController := controller.NewVocabController(vocabService)
 
+	authMiddleware := middleware.NewAuthMiddleware(mockAuthService)
+
 	router := env.Router
-	router.GET("/api/v1/vocab", vocabController.GetWords)
+	vocabGroup := router.Group("/api/v1/vocab")
+	vocabGroup.Use(authMiddleware.Handle())
+	vocabGroup.GET("", vocabController.GetWords)
 
 	t.Run("Unauthorized", func(t *testing.T) {
 		w := httptest.NewRecorder()

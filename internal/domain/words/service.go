@@ -3,7 +3,6 @@ package words
 import (
 	"fmt"
 
-	usersDomain "mono_pardo/internal/domain/users"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 
@@ -11,19 +10,14 @@ import (
 )
 
 type serviceImpl struct {
-	AuthenticationService usersDomain.Service
-	Validate              *validator.Validate
-	Repository            Repository
+	Validate   *validator.Validate
+	Repository Repository
 }
 
-func NewServiceImpl(
-	authenticationService usersDomain.Service,
-	validate *validator.Validate,
-	repository Repository) Service {
+func NewServiceImpl(validate *validator.Validate, repository Repository) Service {
 	return &serviceImpl{
-		AuthenticationService: authenticationService,
-		Validate:              validate,
-		Repository:            repository,
+		Validate:   validate,
+		Repository: repository,
 	}
 }
 
