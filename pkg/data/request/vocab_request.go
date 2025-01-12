@@ -1,14 +1,14 @@
 package request
 
 type CreateWordRequest struct {
-	Token      string `json:"token"`
+	UserId     int
 	Word       string `json:"word"`
 	Definition string `json:"definition"`
 }
 
 type DeleteWordRequest struct {
-	Token  string `json:"token"`
-	WordId int    `json:"word_id"`
+	UserId int
+	WordId int `json:"word_id"`
 }
 
 type FindWordRequest struct {
@@ -16,13 +16,12 @@ type FindWordRequest struct {
 }
 
 type VocabRequest struct {
-	TokenType string `json:"token_type"` // Bearer
-	Token     string `json:"token"`
+	UserId int
 }
 
 type UpdateWordRequest struct {
-	Token string       `json:"token"`
-	Words []WordUpdate `json:"words"`
+	UserId int
+	Words  []WordUpdate `json:"words"`
 }
 
 type WordUpdate struct {

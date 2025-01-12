@@ -28,18 +28,13 @@ func NewServiceImpl(
 }
 
 func (s *serviceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(createWordRequest.Token)
-	if err != nil {
-		return err
-	}
-
 	newWord := Word{
 		Word:       createWordRequest.Word,
 		Definition: createWordRequest.Definition,
-		UserId:     userId,
+		UserId:     createWordRequest.UserId,
 	}
 
-	if err = s.Repository.Save(newWord); err != nil {
+	if err := s.Repository.Save(newWord); err != nil {
 		return err
 	}
 
@@ -47,18 +42,13 @@ func (s *serviceImpl) CreateWord(createWordRequest request.CreateWordRequest) er
 }
 
 func (s *serviceImpl) DeleteWord(deleteWordRequest request.DeleteWordRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(deleteWordRequest.Token)
-	if err != nil {
-		return err
-	}
-
-	if isOwner, err := s.Repository.IsOwnerOfWord(userId, deleteWordRequest.WordId); err != nil {
+	if isOwner, err := s.Repository.IsOwnerOfWord(deleteWordRequest.UserId, deleteWordRequest.WordId); err != nil {
 		return err
 	} else if !isOwner {
 		return fmt.Errorf("you are not allowed to delete the word %d", deleteWordRequest.WordId)
 	}
 
-	if err = s.Repository.Delete(deleteWordRequest.WordId); err != nil {
+	if err := s.Repository.Delete(deleteWordRequest.WordId); err != nil {
 		return err
 	}
 
@@ -85,14 +75,9 @@ func (s *serviceImpl) FindWord(findWordRequest request.FindWordRequest) (respons
 }
 
 func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.VocabResponse, error) {
-	userId, err := s.AuthenticationService.GetUserId(vocabRequest.Token)
-	if err != nil {
-		return nil, err
-	}
-
 	var vocabResponse []response.VocabResponse
 
-	words, err := s.Repository.FindByUserId(userId)
+	words, err := s.Repository.FindByUserId(vocabRequest.UserId)
 	if err != nil {
 		return nil, err
 	}
@@ -115,27 +100,22 @@ func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 }
 
 func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
-	userId, err := s.AuthenticationService.GetUserId(updateWordRequest.Token)
-	if err != nil {
-		return err
-	}
-
 	trainingFields := map[string]bool{"cards": true, "constructor": true, "word_translation": true, "word_audio": true}
 
 	for _, word := range updateWordRequest.Words {
-		if isOwner, err := s.Repository.IsOwnerOfWord(userId, word.WordId); err != nil {
+		if isOwner, err := s.Repository.IsOwnerOfWord(updateWordRequest.UserId, word.WordId); err != nil {
 			return err
 		} else if !isOwner {
 			return fmt.Errorf("you are not allowed to update the word: %d", word.WordId)
 		}
 
-		if err = s.Repository.Update(word); err != nil {
+		if err := s.Repository.Update(word); err != nil {
 			return err
 		}
 
 		for _, update := range word.Updates {
 			if trainingFields[update.Field] {
-				if err = s.updateWordStatus(word.WordId); err != nil {
+				if err := s.updateWordStatus(word.WordId); err != nil {
 					return err
 				}
 				break
