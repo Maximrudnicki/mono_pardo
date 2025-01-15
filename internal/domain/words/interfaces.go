@@ -12,6 +12,7 @@ type Service interface {
 	FindWord(findWordRequest request.FindWordRequest) (response.VocabResponse, error)
 	UpdateWord(updateWordRequest request.UpdateWordRequest) error
 	updateWordStatus(wordId int) error
+	validateWordUpdates(updates []request.WordUpdate) error
 }
 
 type Repository interface {

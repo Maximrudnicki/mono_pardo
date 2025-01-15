@@ -19,7 +19,7 @@ import (
 	"mono_pardo/tests"
 )
 
-func TestGetWords(t *testing.T) {
+func TestDeleteWord(t *testing.T) {
 	env := tests.NewTestEnv(t)
 	defer env.Cleanup(t)
 
@@ -45,7 +45,7 @@ func TestGetWords(t *testing.T) {
 				CreatedAt:       createdAt,
 			},
 			{
-				UserId:          1,
+				UserId:          2,
 				Word:            "world",
 				Definition:      "planet earth",
 				IsLearned:       true,
@@ -71,36 +71,66 @@ func TestGetWords(t *testing.T) {
 	vocabGroup := router.Group("/api/v1/vocab")
 	vocabGroup.Use(authMiddleware.Handle())
 	vocabGroup.GET("", vocabController.GetWords)
+	vocabGroup.DELETE("/:wordId", vocabController.DeleteWord)
 
 	t.Run("Unauthorized", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", "/api/v1/vocab", nil)
+		req, _ := http.NewRequest("DELETE", "/api/v1/vocab/1", nil)
 
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 
-	t.Run("Success Get Words", func(t *testing.T) {
+	t.Run("Invalid Word ID Format", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", "/api/v1/vocab", nil)
+		req, _ := http.NewRequest("DELETE", "/api/v1/vocab/abc", nil)
+		req.Header.Set("Authorization", "Bearer test-token")
 
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Word Not Found", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", "/api/v1/vocab/999", nil)
+		req.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Attempt to Delete Other User's Word", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", "/api/v1/vocab/2", nil)
+		req.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+	})
+
+	t.Run("Success Delete Word", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("DELETE", "/api/v1/vocab/1", nil)
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 
+		// check that user doesn't have any words now
+		checkW := httptest.NewRecorder()
+		checkReq, _ := http.NewRequest("GET", "/api/v1/vocab", nil)
+		checkReq.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(checkW, checkReq)
+
 		var response []resp.VocabResponse
-		err := json.Unmarshal(w.Body.Bytes(), &response)
+		err := json.Unmarshal(checkW.Body.Bytes(), &response)
 		assert.NoError(t, err)
-
-		words := response
-		assert.Len(t, words, 2)
-
-		assert.Equal(t, "hello", words[0].Word)
-		assert.Equal(t, "planet earth", words[1].Definition)
-		assert.Equal(t, false, words[0].IsLearned)
-		assert.WithinDuration(t, createdAt, words[0].CreatedAt, time.Second)
+		assert.Len(t, response, 0)
 	})
 }

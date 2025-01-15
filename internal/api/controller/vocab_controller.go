@@ -20,10 +20,12 @@ func NewVocabController(service wordsDomain.Service) *VocabController {
 }
 
 func (controller *VocabController) CreateWord(ctx *gin.Context) {
-	req := request.CreateWordRequest{UserId: ctx.GetInt("userId")}
+	var req request.CreateWordRequest
 	if !BindJSON(ctx, &req) {
 		return
 	}
+
+	req.UserId = ctx.GetInt("userId")
 
 	if err := controller.vocabService.CreateWord(req); err != nil {
 		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())

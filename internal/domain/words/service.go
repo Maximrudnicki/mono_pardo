@@ -2,6 +2,7 @@ package words
 
 import (
 	"fmt"
+	"strings"
 
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
@@ -22,13 +23,16 @@ func NewServiceImpl(validate *validator.Validate, repository Repository) Service
 }
 
 func (s *serviceImpl) CreateWord(createWordRequest request.CreateWordRequest) error {
-	newWord := Word{
-		Word:       createWordRequest.Word,
-		Definition: createWordRequest.Definition,
-		UserId:     createWordRequest.UserId,
+	newWord, err := NewWord(
+		createWordRequest.Word,
+		createWordRequest.Definition,
+		createWordRequest.UserId,
+	)
+	if err != nil {
+		return fmt.Errorf("invalid word data: %w", err)
 	}
 
-	if err := s.Repository.Save(newWord); err != nil {
+	if err = s.Repository.Save(*newWord); err != nil {
 		return err
 	}
 
@@ -96,6 +100,10 @@ func (s *serviceImpl) GetWords(vocabRequest request.VocabRequest) ([]response.Vo
 func (s *serviceImpl) UpdateWord(updateWordRequest request.UpdateWordRequest) error {
 	trainingFields := map[string]bool{"cards": true, "constructor": true, "word_translation": true, "word_audio": true}
 
+	if err := s.validateWordUpdates(updateWordRequest.Words); err != nil {
+		return err
+	}
+
 	for _, word := range updateWordRequest.Words {
 		if isOwner, err := s.Repository.IsOwnerOfWord(updateWordRequest.UserId, word.WordId); err != nil {
 			return err
@@ -138,6 +146,54 @@ func (s *serviceImpl) updateWordStatus(wordId int) error {
 
 		if err = s.Repository.Update(req); err != nil {
 			return fmt.Errorf("failed to update 'is_learned' status for word ID %d", wordId)
+		}
+	}
+
+	return nil
+}
+
+func (s *serviceImpl) validateWordUpdates(updates []request.WordUpdate) error {
+	allowedFields := map[string]string{
+		"word":             "string",
+		"definition":       "string",
+		"cards":            "bool",
+		"word_translation": "bool",
+		"constructor":      "bool",
+		"word_audio":       "bool",
+	}
+
+	for _, word := range updates {
+		if len(word.Updates) == 0 {
+			return fmt.Errorf("no updates provided for word ID: %d", word.WordId)
+		}
+
+		for _, update := range word.Updates {
+			field := strings.TrimSpace(update.Field)
+			if field == "" {
+				return fmt.Errorf("empty field name not allowed")
+			}
+
+			expectedType, validField := allowedFields[field]
+			if !validField {
+				return fmt.Errorf("invalid field name: %s", field)
+			}
+
+			// Type validation based on field
+			switch expectedType {
+			case "string":
+				strValue, ok := update.Value.(string)
+				if !ok {
+					return fmt.Errorf("field %s requires string value", field)
+				}
+				if strings.TrimSpace(strValue) == "" {
+					return fmt.Errorf("empty value not allowed for field: %s", field)
+				}
+			case "bool":
+				_, ok := update.Value.(bool)
+				if !ok {
+					return fmt.Errorf("field %s requires boolean value", field)
+				}
+			}
 		}
 	}
 
