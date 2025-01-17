@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 
@@ -29,7 +30,7 @@ type TestEnv struct {
 }
 
 // NewTestEnv creates a new test environment
-func NewTestEnv(t *testing.T) *TestEnv {
+func NewTestEnv(t *testing.T) (*TestEnv, config.Config) {
 	t.Helper()
 
 	config := loadTestConfig(t)
@@ -39,7 +40,7 @@ func NewTestEnv(t *testing.T) *TestEnv {
 	return &TestEnv{
 		DB:     db,
 		Router: router,
-	}
+	}, *config
 }
 
 // loadTestConfig loads test configuration from environment
@@ -59,45 +60,57 @@ func setupTestDB(t *testing.T, config *config.Config) *TestDB {
 	t.Helper()
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	uniqueDBName = fmt.Sprintf("%s_%d", config.DBTestName, r.Intn(100000))
 
-	// Connect to postgres for creating test db
-	adminDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable",
-		config.DBHost, config.DBPort, config.DBUsername, config.DBPassword)
+	for attempts := 0; attempts < 5; attempts++ {
+		uniqueDBName = fmt.Sprintf(
+			"%s_%d_%d", config.DBTestName, time.Now().UnixNano(), r.Intn(100000))
 
-	adminDB, err := gorm.Open(postgres.Open(adminDSN), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("Failed to connect to postgres: %v", err)
+		// Connect to postgres for creating test db
+		adminDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable",
+			config.DBHost, config.DBPort, config.DBUsername, config.DBPassword)
+
+		adminDB, err := gorm.Open(postgres.Open(adminDSN), &gorm.Config{})
+		if err != nil {
+			t.Fatalf("Failed to connect to postgres: %v", err)
+		}
+
+		// Create test db
+		sqlDB, err := adminDB.DB()
+		if err != nil {
+			t.Fatalf("Failed to get underlying *sql.DB: %v", err)
+		}
+
+		_, err = sqlDB.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", config.DBTestName))
+		if err != nil {
+			t.Fatalf("Failed to drop test database: %v", err)
+		}
+
+		_, err = sqlDB.Exec(fmt.Sprintf("CREATE DATABASE %s", uniqueDBName))
+		if err != nil {
+			if strings.Contains(err.Error(), "pg_database_datname_index") {
+				t.Logf("Database name conflict, retrying with new name: %v", err)
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
+			t.Fatalf("Failed to create test database: %v", err)
+		}
+
+		// Connect to Test Database
+		testDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			config.DBHost, config.DBPort, config.DBUsername, config.DBPassword, uniqueDBName)
+
+		testDB, err := gorm.Open(postgres.Open(testDSN), &gorm.Config{})
+		if err != nil {
+			t.Fatalf("Failed to connect to test database: %v", err)
+		}
+
+		config.DBTestName = uniqueDBName
+
+		return &TestDB{DB: testDB}
 	}
 
-	// Create test db
-	sqlDB, err := adminDB.DB()
-	if err != nil {
-		t.Fatalf("Failed to get underlying *sql.DB: %v", err)
-	}
-
-	_, err = sqlDB.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", config.DBTestName))
-	if err != nil {
-		t.Fatalf("Failed to drop test database: %v", err)
-	}
-
-	_, err = sqlDB.Exec(fmt.Sprintf("CREATE DATABASE %s", uniqueDBName))
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
-
-	// Connect to Test Database
-	testDSN := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.DBHost, config.DBPort, config.DBUsername, config.DBPassword, uniqueDBName)
-
-	testDB, err := gorm.Open(postgres.Open(testDSN), &gorm.Config{})
-	if err != nil {
-		t.Fatalf("Failed to connect to test database: %v", err)
-	}
-
-	config.DBTestName = uniqueDBName
-
-	return &TestDB{DB: testDB}
+	t.Fatalf("Failed to create a unique test database after multiple attempts")
+	return nil
 }
 
 // Fixture interface for creating fixtures

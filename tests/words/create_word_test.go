@@ -22,7 +22,7 @@ import (
 )
 
 func TestCreateWord(t *testing.T) {
-	env := tests.NewTestEnv(t)
+	env, _ := tests.NewTestEnv(t)
 	defer env.Cleanup(t)
 
 	env.RunMigrations(t)

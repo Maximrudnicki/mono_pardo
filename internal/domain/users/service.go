@@ -50,18 +50,12 @@ func (s *serviceImpl) Login(user request.LoginRequest) (string, error) {
 }
 
 func (s *serviceImpl) Register(user request.CreateUserRequest) error {
-	hashedPassword, err := utils.HashPassword(strings.TrimSpace(user.Password))
+	newUser, err := NewUser(user.Username, user.Email, user.Password)
 	if err != nil {
 		return err
 	}
 
-	newUser := User{
-		Username: strings.TrimSpace(user.Username),
-		Email:    strings.TrimSpace(user.Email),
-		Password: hashedPassword,
-	}
-
-	if err = s.Repository.Save(newUser); err != nil {
+	if err = s.Repository.Save(*newUser); err != nil {
 		return err
 	}
 

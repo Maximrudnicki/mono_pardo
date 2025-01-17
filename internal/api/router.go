@@ -22,7 +22,7 @@ func NewRouter(
 
 	r := router.Group("/api/v1")
 	authenticationRouter := r.Group("/authentication")
-	authenticationRouter.POST("/login/", authenticationController.Login)
+	authenticationRouter.POST("/login", authenticationController.Login)
 	authenticationRouter.POST("/register", authenticationController.Register)
 
 	vocabRouter := r.Group("/vocab", authMiddleware.Handle())
