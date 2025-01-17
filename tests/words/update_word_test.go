@@ -16,7 +16,6 @@ import (
 	"mono_pardo/internal/api/middleware"
 	wordsDomain "mono_pardo/internal/domain/words"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
-	// resp "mono_pardo/pkg/data/response"
 	"mono_pardo/tests"
 )
 

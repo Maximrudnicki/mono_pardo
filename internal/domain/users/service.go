@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"mono_pardo/internal/utils"
 	"mono_pardo/pkg/config"
@@ -32,16 +33,16 @@ func NewServiceImpl(
 }
 
 func (s *serviceImpl) Login(user request.LoginRequest) (string, error) {
-	new_user, err := s.Repository.FindByEmail(user.Email)
+	foundUser, err := s.Repository.FindByEmail(strings.TrimSpace(user.Email))
 	if err != nil {
 		return "", err
 	}
 
-	if err = utils.VerifyPassword(new_user.Password, user.Password); err != nil {
+	if err = utils.VerifyPassword(foundUser.Password, strings.TrimSpace(user.Password)); err != nil {
 		return "", err
 	}
 
-	token, err := utils.GenerateToken(s.Config.TokenExpiresIn, new_user.Id, s.Config.TokenSecret)
+	token, err := utils.GenerateToken(s.Config.TokenExpiresIn, foundUser.Id, s.Config.TokenSecret)
 	if err != nil {
 		return "", err
 	}
@@ -49,14 +50,14 @@ func (s *serviceImpl) Login(user request.LoginRequest) (string, error) {
 }
 
 func (s *serviceImpl) Register(user request.CreateUserRequest) error {
-	hashedPassword, err := utils.HashPassword(user.Password)
+	hashedPassword, err := utils.HashPassword(strings.TrimSpace(user.Password))
 	if err != nil {
 		return err
 	}
 
 	newUser := User{
-		Username: user.Username,
-		Email:    user.Email,
+		Username: strings.TrimSpace(user.Username),
+		Email:    strings.TrimSpace(user.Email),
 		Password: hashedPassword,
 	}
 
