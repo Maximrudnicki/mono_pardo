@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"mono_pardo/internal/api/errors"
-	usersDomain "mono_pardo/internal/domain/users"
+	domain "mono_pardo/internal/domain/users"
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 
@@ -12,10 +12,10 @@ import (
 )
 
 type AuthenticationController struct {
-	AuthenticationService usersDomain.Service
+	AuthenticationService domain.Service
 }
 
-func NewAuthenticationController(service usersDomain.Service) *AuthenticationController {
+func NewAuthenticationController(service domain.Service) *AuthenticationController {
 	return &AuthenticationController{AuthenticationService: service}
 }
 

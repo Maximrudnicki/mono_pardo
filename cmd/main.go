@@ -7,8 +7,10 @@ import (
 
 	"mono_pardo/internal/api"
 	"mono_pardo/internal/api/controller"
+	setsDomain "mono_pardo/internal/domain/sets"
 	usersDomain "mono_pardo/internal/domain/users"
 	wordsDomain "mono_pardo/internal/domain/words"
+	setsInfra "mono_pardo/internal/infrastructure/sets"
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
 	"mono_pardo/pkg/config"
@@ -39,16 +41,19 @@ func main() {
 	//Init Repositories
 	userRepository := usersInfra.NewPostgresRepositoryImpl(db)
 	wordRepository := wordsInfra.NewPostgresRepositoryImpl(db)
+	setsRepository := setsInfra.NewMongoRepositoryImpl()
 
 	//Init Services
 	authenticationService := usersDomain.NewServiceImpl(loadConfig, validate, userRepository)
 	vocabService := wordsDomain.NewServiceImpl(validate, wordRepository)
+	setsService := setsDomain.NewServiceImpl(validate, setsRepository)
 
 	//Init controllers
 	authenticationController := controller.NewAuthenticationController(authenticationService)
 	vocabController := controller.NewVocabController(vocabService)
+	setsController := controller.NewSetsController(setsService)
 
-	router := api.NewRouter(authenticationController, vocabController)
+	router := api.NewRouter(authenticationController, vocabController, setsController)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{loadConfig.ALLOWED_ORIGINS},

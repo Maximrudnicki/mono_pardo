@@ -5,17 +5,17 @@ import (
 	"strconv"
 
 	"mono_pardo/internal/api/errors"
-	wordsDomain "mono_pardo/internal/domain/words"
+	domain "mono_pardo/internal/domain/words"
 	"mono_pardo/pkg/data/request"
 
 	"github.com/gin-gonic/gin"
 )
 
 type VocabController struct {
-	vocabService wordsDomain.Service
+	vocabService domain.Service
 }
 
-func NewVocabController(service wordsDomain.Service) *VocabController {
+func NewVocabController(service domain.Service) *VocabController {
 	return &VocabController{vocabService: service}
 }
 

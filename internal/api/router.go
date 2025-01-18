@@ -9,7 +9,8 @@ import (
 
 func NewRouter(
 	authenticationController *controller.AuthenticationController,
-	vocabController *controller.VocabController) *gin.Engine {
+	vocabController *controller.VocabController,
+	setsController *controller.SetsController) *gin.Engine {
 	router := gin.Default()
 
 	router.Use(middleware.LoggerMiddleware())
@@ -30,6 +31,13 @@ func NewRouter(
 	vocabRouter.POST("", vocabController.CreateWord)
 	vocabRouter.PATCH("", vocabController.UpdateWord)
 	vocabRouter.DELETE("/:wordId", vocabController.DeleteWord)
+
+	setsRouter := r.Group("/sets", authMiddleware.Handle())
+	setsRouter.GET("", setsController.GetSets)
+	setsRouter.POST("", setsController.CreateSet)
+	setsRouter.PATCH("", setsController.UpdateSet)
+	setsRouter.DELETE("", setsController.DeleteSet)
+	setsRouter.GET("/:setId", setsController.GetSets)
 
 	return router
 }
