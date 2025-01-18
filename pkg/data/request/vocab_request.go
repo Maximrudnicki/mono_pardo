@@ -28,8 +28,3 @@ type WordUpdate struct {
 	WordId  int           `json:"id"`
 	Updates []FieldUpdate `json:"updates"`
 }
-
-type FieldUpdate struct {
-	Field string      `json:"field"`
-	Value interface{} `json:"value"`
-}

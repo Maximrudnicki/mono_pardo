@@ -18,11 +18,11 @@ func (controller *SetsController) CreateSet(ctx *gin.Context) {}
 
 func (controller *SetsController) GetSets(ctx *gin.Context) {}
 
+func (controller *SetsController) GetSet(ctx *gin.Context) {}
+
 func (controller *SetsController) UpdateSet(ctx *gin.Context) {}
 
 func (controller *SetsController) DeleteSet(ctx *gin.Context) {}
-
-func (controller *SetsController) GetSet(ctx *gin.Context) {}
 
 func (controller *SetsController) AddWord(ctx *gin.Context) {}
 

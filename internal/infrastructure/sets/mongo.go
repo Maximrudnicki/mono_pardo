@@ -1,6 +1,11 @@
 package sets
 
-import domain "mono_pardo/internal/domain/sets"
+import (
+	domain "mono_pardo/internal/domain/sets"
+	"mono_pardo/pkg/data/request"
+
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 /*
 	Use Mongo DB because of convenient $push $pull system
@@ -14,8 +19,38 @@ import domain "mono_pardo/internal/domain/sets"
 	The same in case of validation of foreign keys. FE just skips missing words
 */
 
-type repositoryImpl struct{}
-
 func NewMongoRepositoryImpl() domain.Repository {
 	return &repositoryImpl{}
+}
+
+type repositoryImpl struct {
+	collection *mongo.Collection
+}
+
+func (r *repositoryImpl) AddToList(groupId string, wordId int) error {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) Delete(groupId string) error {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) FindById(groupId string) (domain.WordSet, error) {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) FindByUserId(userId int) ([]domain.WordSet, error) {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) RemoveFromList(groupId string, wordId int) error {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) Save(wordSet domain.WordSet) error {
+	panic("unimplemented")
+}
+
+func (r *repositoryImpl) Update(groupId string, updates []request.FieldUpdate) error {
+	panic("unimplemented")
 }
