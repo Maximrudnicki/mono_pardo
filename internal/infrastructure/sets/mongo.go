@@ -3,7 +3,7 @@ package sets
 import domain "mono_pardo/internal/domain/sets"
 
 /*
-	Use Mongo DB because of convinient $push $pull system
+	Use Mongo DB because of convenient $push $pull system
 	to manage lists of objects. In our case - lists of words.
 
 	We don't to make any joins because front-end manages this on client's side.
