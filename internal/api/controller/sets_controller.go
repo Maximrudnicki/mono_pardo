@@ -1,9 +1,13 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
+	"mono_pardo/internal/api/errors"
 	domain "mono_pardo/internal/domain/sets"
+	"mono_pardo/pkg/data/request"
 )
 
 type SetsController struct {
@@ -14,9 +18,33 @@ func NewSetsController(service domain.Service) *SetsController {
 	return &SetsController{setsService: service}
 }
 
-func (controller *SetsController) CreateSet(ctx *gin.Context) {}
+func (controller *SetsController) CreateSet(ctx *gin.Context) {
+	var req request.CreateSetRequest
+	if !BindJSON(ctx, &req) {
+		return
+	}
 
-func (controller *SetsController) GetSets(ctx *gin.Context) {}
+	req.UserId = ctx.GetInt("userId")
+
+	if err := controller.setsService.CreateSet(req); err != nil {
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (controller *SetsController) GetSets(ctx *gin.Context) {
+	req := request.GetSetsRequest{UserId: ctx.GetInt("userId")}
+
+	res, err := controller.setsService.GetSets(req)
+	if err != nil {
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
+}
 
 func (controller *SetsController) GetSet(ctx *gin.Context) {}
 

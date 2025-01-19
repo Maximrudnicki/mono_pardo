@@ -1,6 +1,8 @@
 package sets
 
 import (
+	"context"
+
 	"github.com/go-playground/validator"
 
 	"mono_pardo/pkg/data/request"
@@ -24,7 +26,16 @@ func (s *serviceImpl) AddWord(addWordRequest request.AddWordRequest) error {
 }
 
 func (s *serviceImpl) CreateSet(createSetRequest request.CreateSetRequest) error {
-	panic("unimplemented")
+	newSet, err := NewWordSet(createSetRequest.Name, createSetRequest.UserId)
+	if err != nil {
+		return err
+	}
+
+	if err = s.Repository.Save(context.Background(), *newSet); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *serviceImpl) DeleteSet(deleteSetRequest request.DeleteSetRequest) error {
@@ -36,7 +47,23 @@ func (s *serviceImpl) GetSet(getSetRequest request.GetSetRequest) (response.SetR
 }
 
 func (s *serviceImpl) GetSets(getSetsRequest request.GetSetsRequest) ([]response.SetResponse, error) {
-	panic("unimplemented")
+	var setsResponse []response.SetResponse
+
+	sets, err := s.Repository.FindByUserId(context.Background(), getSetsRequest.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, set := range sets {
+		setsResponse = append(setsResponse, response.SetResponse{
+			Id:        set.Id.Hex(),
+			Name:      set.Name,
+			CreatedAt: set.CreatedAt,
+			Words:     set.Words,
+		})
+	}
+
+	return setsResponse, nil
 }
 
 func (s *serviceImpl) RemoveWord(removeWordRequest request.RemoveWordRequest) error {

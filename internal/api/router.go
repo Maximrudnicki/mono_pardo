@@ -38,8 +38,9 @@ func NewRouter(
 	setsRouter.PATCH("", setsController.UpdateSet)
 	setsRouter.DELETE("", setsController.DeleteSet)
 	setsRouter.GET("/:setId", setsController.GetSets)
-	setsRouter.GET("/:setId", setsController.AddWord)
-	setsRouter.GET("/:setId", setsController.RemoveWord)
+
+	setsRouter.POST("/:setId", setsController.AddWord)
+	setsRouter.DELETE("/:setId", setsController.RemoveWord)
 
 	return router
 }

@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/go-playground/validator"
+	"github.com/rs/cors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"mono_pardo/internal/api"
 	"mono_pardo/internal/api/controller"
@@ -14,9 +20,6 @@ import (
 	usersInfra "mono_pardo/internal/infrastructure/users"
 	wordsInfra "mono_pardo/internal/infrastructure/words"
 	"mono_pardo/pkg/config"
-
-	"github.com/go-playground/validator"
-	"github.com/rs/cors"
 )
 
 func main() {
@@ -38,10 +41,21 @@ func main() {
 		log.Fatalf("Database table error: %v\n", err)
 	}
 
+	mc := fmt.Sprintf(loadConfig.MONGODB_STRING)
+
+	clientOptions := options.Client().ApplyURI(mc)
+
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Println("Error connecting:", err)
+	}
+
+	setsCollection := client.Database(loadConfig.MONGODB_DB).Collection("sets")
+
 	//Init Repositories
 	userRepository := usersInfra.NewPostgresRepositoryImpl(db)
 	wordRepository := wordsInfra.NewPostgresRepositoryImpl(db)
-	setsRepository := setsInfra.NewMongoRepositoryImpl()
+	setsRepository := setsInfra.NewMongoRepositoryImpl(setsCollection)
 
 	//Init Services
 	authenticationService := usersDomain.NewServiceImpl(loadConfig, validate, userRepository)

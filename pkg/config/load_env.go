@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	// "github.com/joho/godotenv" // alternative
 )
 
 type Config struct {
@@ -16,6 +17,9 @@ type Config struct {
 	DBName     string `mapstructure:"POSTGRES_DB"`
 	DBTestName string `mapstructure:"POSTGRES_DB_TEST"`
 	DBPort     string `mapstructure:"POSTGRES_PORT"`
+
+	MONGODB_STRING string `mapstructure:"MONGODB_STRING"`
+	MONGODB_DB     string `mapstructure:"MONGODB_DB"`
 
 	TokenSecret    string        `mapstructure:"TOKEN_SECRET"`
 	TokenExpiresIn time.Duration `mapstructure:"TOKEN_EXPIRED_IN"`

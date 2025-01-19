@@ -1,6 +1,8 @@
 package sets
 
 import (
+	"context"
+
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
 )
@@ -17,12 +19,12 @@ type Service interface {
 }
 
 type Repository interface {
-	Save(wordSet WordSet) error
-	FindById(groupId string) (WordSet, error)
-	FindByUserId(userId int) ([]WordSet, error)
-	Update(groupId string, updates []request.FieldUpdate) error
-	Delete(groupId string) error
+	Save(ctx context.Context, wordSet WordSet) error
+	FindById(ctx context.Context, wordSetId string) (WordSet, error)
+	FindByUserId(ctx context.Context, userId int) ([]WordSet, error)
+	Update(ctx context.Context, wordSetId string, updates []request.FieldUpdate) error
+	Delete(ctx context.Context, wordSetId string) error
 
-	AddToList(groupId string, wordId int) error
-	RemoveFromList(groupId string, wordId int) error
+	AddToList(ctx context.Context, wordSetId string, wordId int) error
+	RemoveFromList(ctx context.Context, wordSetId string, wordId int) error
 }

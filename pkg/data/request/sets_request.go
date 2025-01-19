@@ -6,8 +6,8 @@ type CreateSetRequest struct {
 }
 
 type GetSetRequest struct {
-	UserId  int
-	GroupId string `json:"group_id"`
+	UserId    int
+	WordSetId string `json:"word_set_id"`
 }
 
 type GetSetsRequest struct {
@@ -15,24 +15,24 @@ type GetSetsRequest struct {
 }
 
 type UpdateSetRequest struct {
-	UserId  int
-	GroupId string        `json:"group_id"`
-	Updates []FieldUpdate `json:"updates"`
+	UserId    int
+	WordSetId string        `json:"word_set_id"`
+	Updates   []FieldUpdate `json:"updates"`
 }
 
 type DeleteSetRequest struct {
-	UserId  int
-	GroupId string `json:"group_id"`
+	UserId    int
+	WordSetId string `json:"word_set_id"`
 }
 
 type AddWordRequest struct {
-	UserId  int
-	GroupId string
-	WordId  int `json:"word_id"`
+	UserId    int
+	WordSetId string
+	WordId    int `json:"word_id"`
 }
 
 type RemoveWordRequest struct {
-	UserId  int
-	GroupId string
-	WordId  int `json:"word_id"`
+	UserId    int
+	WordSetId string
+	WordId    int `json:"word_id"`
 }
