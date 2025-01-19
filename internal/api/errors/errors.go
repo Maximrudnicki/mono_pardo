@@ -6,6 +6,7 @@ const (
 	ValidationError   ErrorType = "VALIDATION_ERROR"
 	NotFoundError     ErrorType = "NOT_FOUND"
 	UnauthorizedError ErrorType = "UNAUTHORIZED"
+	ForbiddenError    ErrorType = "FORBIDDEN"
 	InternalError     ErrorType = "INTERNAL_ERROR"
 )
 

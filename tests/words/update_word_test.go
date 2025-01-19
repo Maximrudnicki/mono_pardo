@@ -81,7 +81,7 @@ func TestUpdateWord(t *testing.T) {
 	router := env.Router
 	vocabGroup := router.Group("/api/v1/vocab")
 	vocabGroup.Use(authMiddleware.Handle())
-	vocabGroup.PATCH("", vocabController.UpdateWord)
+	vocabGroup.PATCH("", vocabController.UpdateWords)
 
 	t.Run("Unauthorized", func(t *testing.T) {
 		w := httptest.NewRecorder()

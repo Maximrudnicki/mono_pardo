@@ -58,14 +58,14 @@ func (controller *VocabController) GetWords(ctx *gin.Context) {
 
 	res, err := controller.vocabService.GetWords(vocabRequest)
 	if err != nil {
-		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		SendError(ctx, http.StatusInternalServerError, errors.InternalError, err.Error())
 		return
 	}
 
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (controller *VocabController) UpdateWord(ctx *gin.Context) {
+func (controller *VocabController) UpdateWords(ctx *gin.Context) {
 	var words []request.WordUpdate
 	if !BindJSON(ctx, &words) {
 		return

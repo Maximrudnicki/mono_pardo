@@ -25,8 +25,8 @@ type Repository interface {
 	Update(ctx context.Context, wordSetId string, updates []request.FieldUpdate) error
 	Delete(ctx context.Context, wordSetId string) error
 
-	AddToList(ctx context.Context, wordSetId string, wordId int) error
-	RemoveFromList(ctx context.Context, wordSetId string, wordId int) error
+	AddToList(ctx context.Context, wordSetId string, words []int) error
+	RemoveFromList(ctx context.Context, wordSetId string, words []int) error
 
 	// utils
 	IsOwnerOfWordSet(ctx context.Context, userId int, wordSetId string) (bool, error)

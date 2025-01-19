@@ -35,7 +35,7 @@ func (s *serviceImpl) AddWord(addWordRequest request.AddWordRequest) error {
 	}
 
 	if err := s.Repository.AddToList(
-		context.Background(), addWordRequest.WordSetId, addWordRequest.WordId); err != nil {
+		context.Background(), addWordRequest.WordSetId, addWordRequest.Words); err != nil {
 		return err
 	}
 
@@ -122,7 +122,7 @@ func (s *serviceImpl) RemoveWord(removeWordRequest request.RemoveWordRequest) er
 	}
 
 	if err := s.Repository.RemoveFromList(
-		context.Background(), removeWordRequest.WordSetId, removeWordRequest.WordId); err != nil {
+		context.Background(), removeWordRequest.WordSetId, removeWordRequest.Words); err != nil {
 		return err
 	}
 

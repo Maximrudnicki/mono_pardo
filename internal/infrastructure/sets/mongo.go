@@ -33,14 +33,14 @@ type repositoryImpl struct {
 	collection *mongo.Collection
 }
 
-func (r *repositoryImpl) AddToList(ctx context.Context, wordSetId string, wordId int) error {
+func (r *repositoryImpl) AddToList(ctx context.Context, wordSetId string, words []int) error {
 	oid, err := primitive.ObjectIDFromHex(wordSetId)
 	if err != nil {
 		return errors.New("cannot parse word set ID")
 	}
 
 	filter := bson.M{"_id": oid}
-	update := bson.M{"$addToSet": bson.M{"words": wordId}}
+	update := bson.M{"$addToSet": bson.M{"words": bson.M{"$each": words}}}
 
 	res, err := r.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -117,13 +117,13 @@ func (r *repositoryImpl) FindByUserId(ctx context.Context, userId int) ([]domain
 	return sets, nil
 }
 
-func (r *repositoryImpl) RemoveFromList(ctx context.Context, wordSetId string, wordId int) error {
+func (r *repositoryImpl) RemoveFromList(ctx context.Context, wordSetId string, words []int) error {
 	oid, err := primitive.ObjectIDFromHex(wordSetId)
 	if err != nil {
 		return errors.New("cannot parse word set ID")
 	}
 
-	update := bson.M{"$pull": bson.M{"words": wordId}}
+	update := bson.M{"$pull": bson.M{"words": bson.M{"$in": words}}}
 	res, err := r.collection.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
 		return errors.New("cannot remove words")

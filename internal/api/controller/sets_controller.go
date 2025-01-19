@@ -39,19 +39,124 @@ func (controller *SetsController) GetSets(ctx *gin.Context) {
 
 	res, err := controller.setsService.GetSets(req)
 	if err != nil {
-		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		SendError(ctx, http.StatusInternalServerError, errors.InternalError, err.Error())
 		return
 	}
 
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (controller *SetsController) GetSet(ctx *gin.Context) {}
+func (controller *SetsController) GetSet(ctx *gin.Context) {
+	req := request.GetSetRequest{
+		UserId:    ctx.GetInt("userId"),
+		WordSetId: ctx.Param("setId"),
+	}
 
-func (controller *SetsController) UpdateSet(ctx *gin.Context) {}
+	res, err := controller.setsService.GetSet(req)
+	if err != nil {
+		if err.Error() == domain.ErrAccessForbidden {
+			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
+			return
+		}
+		SendError(ctx, http.StatusNotFound, errors.NotFoundError, err.Error())
+		return
+	}
 
-func (controller *SetsController) DeleteSet(ctx *gin.Context) {}
+	ctx.JSON(http.StatusOK, res)
+}
 
-func (controller *SetsController) AddWord(ctx *gin.Context) {}
+func (controller *SetsController) UpdateSet(ctx *gin.Context) {
+	var req request.UpdateSetRequest
+	if !BindJSON(ctx, &req) {
+		return
+	}
 
-func (controller *SetsController) RemoveWord(ctx *gin.Context) {}
+	req.UserId = ctx.GetInt("userId")
+	req.WordSetId = ctx.Param("setId")
+
+	if len(req.Updates) == 0 {
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "No updates provided")
+		return
+	}
+
+	if err := controller.setsService.UpdateSet(req); err != nil {
+		if err.Error() == domain.ErrAccessForbidden {
+			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
+			return
+		}
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (controller *SetsController) DeleteSet(ctx *gin.Context) {
+	req := request.DeleteSetRequest{
+		UserId:    ctx.GetInt("userId"),
+		WordSetId: ctx.Param("setId"),
+	}
+
+	if err := controller.setsService.DeleteSet(req); err != nil {
+		if err.Error() == domain.ErrAccessForbidden {
+			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
+			return
+		}
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (controller *SetsController) AddWord(ctx *gin.Context) {
+	var req request.AddWordRequest
+	if !BindJSON(ctx, &req) {
+		return
+	}
+
+	req.UserId = ctx.GetInt("userId")
+	req.WordSetId = ctx.Param("setId")
+
+	if len(req.Words) == 0 {
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "No words provided")
+		return
+	}
+
+	if err := controller.setsService.AddWord(req); err != nil {
+		if err.Error() == domain.ErrAccessForbidden {
+			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
+			return
+		}
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}
+
+func (controller *SetsController) RemoveWord(ctx *gin.Context) {
+	var req request.RemoveWordRequest
+	if !BindJSON(ctx, &req) {
+		return
+	}
+
+	req.UserId = ctx.GetInt("userId")
+	req.WordSetId = ctx.Param("setId")
+
+	if len(req.Words) == 0 {
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, "No words provided")
+		return
+	}
+
+	if err := controller.setsService.RemoveWord(req); err != nil {
+		if err.Error() == domain.ErrAccessForbidden {
+			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
+			return
+		}
+		SendError(ctx, http.StatusBadRequest, errors.ValidationError, err.Error())
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+}

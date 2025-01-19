@@ -29,18 +29,18 @@ func NewRouter(
 	vocabRouter := r.Group("/vocab", authMiddleware.Handle())
 	vocabRouter.GET("", vocabController.GetWords)
 	vocabRouter.POST("", vocabController.CreateWord)
-	vocabRouter.PATCH("", vocabController.UpdateWord)
+	vocabRouter.PATCH("", vocabController.UpdateWords)
 	vocabRouter.DELETE("/:wordId", vocabController.DeleteWord)
 
 	setsRouter := r.Group("/sets", authMiddleware.Handle())
-	setsRouter.GET("", setsController.GetSets)
 	setsRouter.POST("", setsController.CreateSet)
-	setsRouter.PATCH("", setsController.UpdateSet)
-	setsRouter.DELETE("", setsController.DeleteSet)
-	setsRouter.GET("/:setId", setsController.GetSets)
+	setsRouter.GET("", setsController.GetSets)
+	setsRouter.GET("/:setId", setsController.GetSet)
+	setsRouter.PATCH("/:setId", setsController.UpdateSet)
+	setsRouter.DELETE("/:setId", setsController.DeleteSet)
 
-	setsRouter.POST("/:setId", setsController.AddWord)
-	setsRouter.DELETE("/:setId", setsController.RemoveWord)
+	setsRouter.POST("/:setId/words", setsController.AddWord)
+	setsRouter.DELETE("/:setId/words", setsController.RemoveWord)
 
 	return router
 }
