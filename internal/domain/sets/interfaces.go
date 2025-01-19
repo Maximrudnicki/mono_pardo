@@ -27,4 +27,7 @@ type Repository interface {
 
 	AddToList(ctx context.Context, wordSetId string, wordId int) error
 	RemoveFromList(ctx context.Context, wordSetId string, wordId int) error
+
+	// utils
+	IsOwnerOfWordSet(ctx context.Context, userId int, wordSetId string) (bool, error)
 }

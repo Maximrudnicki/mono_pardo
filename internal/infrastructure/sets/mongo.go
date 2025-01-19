@@ -57,7 +57,7 @@ func (r *repositoryImpl) AddToList(ctx context.Context, wordSetId string, wordId
 func (r *repositoryImpl) Delete(ctx context.Context, wordSetId string) error {
 	oid, err := primitive.ObjectIDFromHex(wordSetId)
 	if err != nil {
-		return errors.New("cannot get id to delete word set")
+		return errors.New("cannot parse word set ID")
 	}
 
 	res, err := r.collection.DeleteOne(ctx, bson.M{"_id": oid})
@@ -76,7 +76,7 @@ func (r *repositoryImpl) FindById(ctx context.Context, wordSetId string) (domain
 	var data domain.WordSet
 	oid, err := primitive.ObjectIDFromHex(wordSetId)
 	if err != nil {
-		return data, errors.New("cannot parse id to delete word set")
+		return data, errors.New("cannot parse word set ID")
 	}
 	filter := bson.M{"_id": oid}
 
@@ -101,8 +101,8 @@ func (r *repositoryImpl) FindByUserId(ctx context.Context, userId int) ([]domain
 
 	for res.Next(ctx) {
 		var set domain.WordSet
-		err := res.Decode(&set)
-		if err != nil {
+
+		if err := res.Decode(&set); err != nil {
 			return nil, err
 		}
 
@@ -118,19 +118,19 @@ func (r *repositoryImpl) FindByUserId(ctx context.Context, userId int) ([]domain
 }
 
 func (r *repositoryImpl) RemoveFromList(ctx context.Context, wordSetId string, wordId int) error {
-	set, err := r.FindById(ctx, wordSetId)
+	oid, err := primitive.ObjectIDFromHex(wordSetId)
 	if err != nil {
-		return errors.New("cannot find set by id")
+		return errors.New("cannot parse word set ID")
 	}
 
 	update := bson.M{"$pull": bson.M{"words": wordId}}
-	res, err := r.collection.UpdateOne(ctx, bson.M{"_id": set.Id}, update)
+	res, err := r.collection.UpdateOne(ctx, bson.M{"_id": oid}, update)
 	if err != nil {
 		return errors.New("cannot remove words")
 	}
 
-	if res.ModifiedCount == 0 {
-		return errors.New("set not found or words not in set")
+	if res.MatchedCount == 0 {
+		return errors.New("word set not found")
 	}
 
 	return nil
@@ -178,4 +178,20 @@ func (r *repositoryImpl) Update(ctx context.Context, wordSetId string, updates [
 	}
 
 	return nil
+}
+
+func (r *repositoryImpl) IsOwnerOfWordSet(ctx context.Context, userId int, wordSetId string) (bool, error) {
+	oid, err := primitive.ObjectIDFromHex(wordSetId)
+	if err != nil {
+		return false, errors.New("cannot parse word set ID")
+	}
+
+	filter := bson.M{"_id": oid, "user_id": userId}
+
+	count, err := r.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, errors.New("cannot check word set ownership")
+	}
+
+	return count > 0, nil
 }

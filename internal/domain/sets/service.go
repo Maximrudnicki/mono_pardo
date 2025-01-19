@@ -2,11 +2,16 @@ package sets
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-playground/validator"
 
 	"mono_pardo/pkg/data/request"
 	"mono_pardo/pkg/data/response"
+)
+
+const (
+	ErrAccessForbidden = "access forbidden"
 )
 
 func NewServiceImpl(validate *validator.Validate, repository Repository) Service {
@@ -22,7 +27,19 @@ type serviceImpl struct {
 }
 
 func (s *serviceImpl) AddWord(addWordRequest request.AddWordRequest) error {
-	panic("unimplemented")
+	if isOwner, err := s.Repository.IsOwnerOfWordSet(
+		context.Background(), addWordRequest.UserId, addWordRequest.WordSetId); err != nil {
+		return err
+	} else if !isOwner {
+		return errors.New(ErrAccessForbidden)
+	}
+
+	if err := s.Repository.AddToList(
+		context.Background(), addWordRequest.WordSetId, addWordRequest.WordId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *serviceImpl) CreateSet(createSetRequest request.CreateSetRequest) error {
@@ -39,11 +56,41 @@ func (s *serviceImpl) CreateSet(createSetRequest request.CreateSetRequest) error
 }
 
 func (s *serviceImpl) DeleteSet(deleteSetRequest request.DeleteSetRequest) error {
-	panic("unimplemented")
+	if isOwner, err := s.Repository.IsOwnerOfWordSet(
+		context.Background(), deleteSetRequest.UserId, deleteSetRequest.WordSetId); err != nil {
+		return err
+	} else if !isOwner {
+		return errors.New(ErrAccessForbidden)
+	}
+
+	if err := s.Repository.Delete(context.Background(), deleteSetRequest.WordSetId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *serviceImpl) GetSet(getSetRequest request.GetSetRequest) (response.SetResponse, error) {
-	panic("unimplemented")
+	var setResponse response.SetResponse
+
+	if isOwner, err := s.Repository.IsOwnerOfWordSet(
+		context.Background(), getSetRequest.UserId, getSetRequest.WordSetId); err != nil {
+		return setResponse, err
+	} else if !isOwner {
+		return setResponse, errors.New(ErrAccessForbidden)
+	}
+
+	set, err := s.Repository.FindById(context.Background(), getSetRequest.WordSetId)
+	if err != nil {
+		return setResponse, err
+	}
+
+	return response.SetResponse{
+		Id:        set.Id.Hex(),
+		Name:      set.Name,
+		CreatedAt: set.CreatedAt,
+		Words:     set.Words,
+	}, nil
 }
 
 func (s *serviceImpl) GetSets(getSetsRequest request.GetSetsRequest) ([]response.SetResponse, error) {
@@ -67,9 +114,33 @@ func (s *serviceImpl) GetSets(getSetsRequest request.GetSetsRequest) ([]response
 }
 
 func (s *serviceImpl) RemoveWord(removeWordRequest request.RemoveWordRequest) error {
-	panic("unimplemented")
+	if isOwner, err := s.Repository.IsOwnerOfWordSet(
+		context.Background(), removeWordRequest.UserId, removeWordRequest.WordSetId); err != nil {
+		return err
+	} else if !isOwner {
+		return errors.New(ErrAccessForbidden)
+	}
+
+	if err := s.Repository.RemoveFromList(
+		context.Background(), removeWordRequest.WordSetId, removeWordRequest.WordId); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *serviceImpl) UpdateSet(updateSetRequest request.UpdateSetRequest) error {
-	panic("unimplemented")
+	if isOwner, err := s.Repository.IsOwnerOfWordSet(
+		context.Background(), updateSetRequest.UserId, updateSetRequest.WordSetId); err != nil {
+		return err
+	} else if !isOwner {
+		return errors.New(ErrAccessForbidden)
+	}
+
+	if err := s.Repository.Update(
+		context.Background(), updateSetRequest.WordSetId, updateSetRequest.Updates); err != nil {
+		return err
+	}
+
+	return nil
 }
