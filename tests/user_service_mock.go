@@ -1,4 +1,4 @@
-package words
+package tests
 
 import (
 	"github.com/stretchr/testify/mock"

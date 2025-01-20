@@ -27,7 +27,7 @@ func TestCreateWord(t *testing.T) {
 
 	env.RunMigrations(t)
 
-	mockAuthService := &MockAuthService{}
+	mockAuthService := &tests.MockAuthService{}
 	mockAuthService.On("GetUserId", "test-token").Return(1, nil)
 	mockAuthService.On("GetUserId", "test-token-user2").Return(2, nil)
 	mockAuthService.On("GetUserId", "").Return(0, fmt.Errorf("empty token"))

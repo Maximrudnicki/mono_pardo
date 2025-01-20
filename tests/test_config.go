@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -8,6 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -23,10 +27,23 @@ type TestDB struct {
 	DB *gorm.DB
 }
 
+// TestMongoDB represents test database configuration and connection
+type TestMongoDB struct {
+	Client     *mongo.Client
+	DB         *mongo.Database
+	Collection *mongo.Collection
+}
+
 // TestEnv holds all test environment components
 type TestEnv struct {
 	DB     *TestDB
 	Router *gin.Engine
+}
+
+// TestMongoEnv holds all test environment components
+type TestMongoEnv struct {
+	MongoDB *TestMongoDB
+	Router  *gin.Engine
 }
 
 // NewTestEnv creates a new test environment
@@ -40,6 +57,20 @@ func NewTestEnv(t *testing.T) (*TestEnv, config.Config) {
 	return &TestEnv{
 		DB:     db,
 		Router: router,
+	}, *config
+}
+
+// NewTestMongoEnv creates a new test environment
+func NewTestMongoEnv(t *testing.T) (*TestMongoEnv, config.Config) {
+	t.Helper()
+
+	config := loadTestConfig(t)
+	db := setupTestMongoDB(t, config)
+	router := gin.New()
+
+	return &TestMongoEnv{
+		MongoDB: db,
+		Router:  router,
 	}, *config
 }
 
@@ -113,10 +144,46 @@ func setupTestDB(t *testing.T, config *config.Config) *TestDB {
 	return nil
 }
 
+// setupTestMongoDB creates and configures test database
+func setupTestMongoDB(t *testing.T, config *config.Config) *TestMongoDB {
+	t.Helper()
+
+	ctx := context.Background()
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	uniqueDBName = fmt.Sprintf("%s_%d_%d", config.DBTestName, time.Now().UnixNano(), r.Intn(100000))
+
+	// Connect to MongoDB using your connection string format
+	uri := config.MONGODB_STRING // Use your actual config field
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		t.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	// Ping the database
+	if err = client.Ping(ctx, nil); err != nil {
+		t.Fatalf("Failed to ping MongoDB: %v", err)
+	}
+
+	db := client.Database(uniqueDBName)
+	collection := db.Collection("sets")
+
+	return &TestMongoDB{
+		Client:     client,
+		DB:         db,
+		Collection: collection,
+	}
+}
+
 // Fixture interface for creating fixtures
 type Fixture interface {
 	Setup(db *gorm.DB) error
 	Teardown(db *gorm.DB) error
+}
+
+// MongoFixture interface for creating fixtures
+type MongoFixture interface {
+	Setup(db *mongo.Database) error
+	Teardown(db *mongo.Database) error
 }
 
 // WithFixture prepare fixture for test
@@ -129,6 +196,21 @@ func (env *TestEnv) WithFixture(t *testing.T, fixture Fixture) func() {
 
 	return func() {
 		if err := fixture.Teardown(env.DB.DB); err != nil {
+			t.Errorf("Failed to teardown fixture: %v", err)
+		}
+	}
+}
+
+// WithMongoFixture prepare fixture for test
+func (env *TestMongoEnv) WithMongoFixture(t *testing.T, fixture MongoFixture) func() {
+	t.Helper()
+
+	if err := fixture.Setup(env.MongoDB.DB); err != nil {
+		t.Fatalf("Failed to setup fixture: %v", err)
+	}
+
+	return func() {
+		if err := fixture.Teardown(env.MongoDB.DB); err != nil {
 			t.Errorf("Failed to teardown fixture: %v", err)
 		}
 	}
@@ -148,6 +230,31 @@ func (env *TestEnv) RunMigrations(t *testing.T) {
 
 	if err := env.DB.DB.AutoMigrate(models...); err != nil {
 		t.Fatalf("Failed to run migrations: %v", err)
+	}
+}
+
+// RunMigrations for MongoDB (creates indexes if needed)
+func (env *TestMongoEnv) RunMigrations(t *testing.T) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// Create indexes for the sets collection
+	indexes := []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+				{Key: "name", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{{Key: "created_at", Value: 1}},
+		},
+	}
+
+	_, err := env.MongoDB.Collection.Indexes().CreateMany(ctx, indexes)
+	if err != nil {
+		t.Fatalf("Failed to create indexes: %v", err)
 	}
 }
 
@@ -188,5 +295,22 @@ func (env *TestEnv) Cleanup(t *testing.T) {
 	_, err = sqlDB.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", uniqueDBName))
 	if err != nil {
 		t.Errorf("Failed to drop test database: %v", err)
+	}
+}
+
+// Cleanup test environment
+func (env *TestMongoEnv) Cleanup(t *testing.T) {
+	t.Helper()
+
+	ctx := context.Background()
+
+	// Drop the test database
+	if err := env.MongoDB.DB.Drop(ctx); err != nil {
+		t.Errorf("Failed to drop test database: %v", err)
+	}
+
+	// Close the connection
+	if err := env.MongoDB.Client.Disconnect(ctx); err != nil {
+		t.Errorf("Failed to disconnect from MongoDB: %v", err)
 	}
 }
