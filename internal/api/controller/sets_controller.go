@@ -54,10 +54,6 @@ func (controller *SetsController) GetSet(ctx *gin.Context) {
 
 	res, err := controller.setsService.GetSet(req)
 	if err != nil {
-		if err.Error() == domain.ErrAccessForbidden {
-			SendError(ctx, http.StatusForbidden, errors.ForbiddenError, err.Error())
-			return
-		}
 		SendError(ctx, http.StatusNotFound, errors.NotFoundError, err.Error())
 		return
 	}

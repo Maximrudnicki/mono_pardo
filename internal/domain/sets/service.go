@@ -77,7 +77,7 @@ func (s *serviceImpl) GetSet(getSetRequest request.GetSetRequest) (response.SetR
 		context.Background(), getSetRequest.UserId, getSetRequest.WordSetId); err != nil {
 		return setResponse, err
 	} else if !isOwner {
-		return setResponse, errors.New(ErrAccessForbidden)
+		return setResponse, errors.New("cannot find word set with specified ID")
 	}
 
 	set, err := s.Repository.FindById(context.Background(), getSetRequest.WordSetId)

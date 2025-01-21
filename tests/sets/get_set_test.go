@@ -31,6 +31,7 @@ func TestGetSet(t *testing.T) {
 
 	firstSet, _ := setsDomain.NewWordSet("first Set", 1)
 	secondSet, _ := setsDomain.NewWordSet("second Set", 2)
+	thirdSet, _ := setsDomain.NewWordSet("third Set", 1) // don't save this set to the database
 
 	firstSet.Words = []int{1, 3}
 	secondSet.Words = []int{2, 4}
@@ -62,6 +63,18 @@ func TestGetSet(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("Set Not Found", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(
+			"GET", fmt.Sprintf("/api/v1/sets/%v", thirdSet.Id.Hex()), nil)
+
+		req.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 
 	t.Run("Success Get Set", func(t *testing.T) {
