@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"mono_pardo/internal/api/controller"
 	"mono_pardo/internal/api/middleware"
@@ -26,8 +27,14 @@ func TestGetSets(t *testing.T) {
 	mockAuthService.On("GetUserId", "test-token").Return(1, nil)
 	mockAuthService.On("GetUserId", "").Return(0, fmt.Errorf("empty token"))
 
+	createdAt := time.Now().UTC().Truncate(time.Millisecond)
+
 	firstSet, _ := setsDomain.NewWordSet("first Set", 1)
 	secondSet, _ := setsDomain.NewWordSet("second Set", 2)
+
+	firstSet.Words = []int{1, 3}
+	secondSet.Words = []int{2, 4}
+	firstSet.CreatedAt, secondSet.CreatedAt = createdAt, createdAt
 
 	fixture := &tests.WordSetFixture{
 		Sets: []setsDomain.WordSet{*firstSet, *secondSet},
@@ -54,5 +61,22 @@ func TestGetSets(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("Success Get Sets", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", "/api/v1/sets", nil)
+
+		req.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expectedResponse := fmt.Sprintf(
+			`[{"id":"%v","name":"first Set","created_at":"%v","words":[1,3]}]`,
+			firstSet.Id.Hex(), createdAt.Format(time.RFC3339Nano))
+
+		assert.JSONEq(t, expectedResponse, w.Body.String())
 	})
 }
