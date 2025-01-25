@@ -137,5 +137,14 @@ func TestAddWordToSet(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+
+		checkW := httptest.NewRecorder()
+		checkReq, _ := http.NewRequest("GET", fmt.Sprintf("/api/v1/sets/%v", firstSet.Id.Hex()), nil)
+		checkReq.Header.Set("Authorization", "Bearer test-token")
+
+		router.ServeHTTP(checkW, checkReq)
+
+		assert.Equal(t, http.StatusOK, checkW.Code)
+		assert.Contains(t, checkW.Body.String(), `"words":[1,3,7]`)
 	})
 }
