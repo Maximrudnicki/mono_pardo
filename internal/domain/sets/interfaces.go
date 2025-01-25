@@ -16,6 +16,8 @@ type Service interface {
 
 	AddWord(addWordRequest request.AddWordRequest) error
 	RemoveWord(removeWordRequest request.RemoveWordRequest) error
+
+	validateSetUpdates(updates []request.FieldUpdate) error
 }
 
 type Repository interface {

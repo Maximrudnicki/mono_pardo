@@ -3,6 +3,9 @@ package sets
 import (
 	"context"
 	"errors"
+	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator"
 
@@ -130,6 +133,10 @@ func (s *serviceImpl) RemoveWord(removeWordRequest request.RemoveWordRequest) er
 }
 
 func (s *serviceImpl) UpdateSet(updateSetRequest request.UpdateSetRequest) error {
+	if err := s.validateSetUpdates(updateSetRequest.Updates); err != nil {
+		return err
+	}
+
 	if isOwner, err := s.Repository.IsOwnerOfWordSet(
 		context.Background(), updateSetRequest.UserId, updateSetRequest.WordSetId); err != nil {
 		return err
@@ -140,6 +147,40 @@ func (s *serviceImpl) UpdateSet(updateSetRequest request.UpdateSetRequest) error
 	if err := s.Repository.Update(
 		context.Background(), updateSetRequest.WordSetId, updateSetRequest.Updates); err != nil {
 		return err
+	}
+
+	return nil
+}
+func (s *serviceImpl) validateSetUpdates(updates []request.FieldUpdate) error {
+	allowedFields := map[string]string{"name": "string"}
+
+	if len(updates) == 0 {
+		return fmt.Errorf("no updates provided for word set ID")
+	}
+
+	for _, update := range updates {
+		field := strings.TrimSpace(update.Field)
+		if field == "" {
+			return fmt.Errorf("empty field name not allowed")
+		}
+
+		expectedType, validField := allowedFields[field]
+		if !validField {
+			return fmt.Errorf("invalid field name: %s", field)
+		}
+
+		valueType := reflect.TypeOf(update.Value).Kind()
+		if expectedType == "string" && valueType != reflect.String {
+			return fmt.Errorf("field %s requires string value, got %s", field, valueType)
+		}
+
+		strValue, ok := update.Value.(string)
+		if !ok {
+			return fmt.Errorf("field %s requires string value", field)
+		}
+		if strings.TrimSpace(strValue) == "" {
+			return fmt.Errorf("empty value not allowed for field: %s", field)
+		}
 	}
 
 	return nil
