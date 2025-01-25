@@ -62,7 +62,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 
 	t.Run("Unauthorized", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), nil)
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), nil)
 
 		router.ServeHTTP(w, req)
 
@@ -81,7 +82,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 
 	t.Run("No Input", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), nil)
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), nil)
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
@@ -96,7 +98,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 		jsonData, _ := json.Marshal(payload)
 
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", thirdSet.Id.Hex()), bytes.NewBuffer(jsonData))
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", thirdSet.Id.Hex()), bytes.NewBuffer(jsonData))
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
@@ -111,7 +114,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 		jsonData, _ := json.Marshal(payload)
 
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", secondSet.Id.Hex()), bytes.NewBuffer(jsonData))
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", secondSet.Id.Hex()), bytes.NewBuffer(jsonData))
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
@@ -126,7 +130,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 		jsonData, _ := json.Marshal(payload)
 
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), bytes.NewBuffer(jsonData))
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), bytes.NewBuffer(jsonData))
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
@@ -141,7 +146,8 @@ func TestRemoveWordFromSet(t *testing.T) {
 		jsonData, _ := json.Marshal(payload)
 
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), bytes.NewBuffer(jsonData))
+		req, _ := http.NewRequest(
+			"DELETE", fmt.Sprintf("/api/v1/sets/%v/words", firstSet.Id.Hex()), bytes.NewBuffer(jsonData))
 		req.Header.Set("Authorization", "Bearer test-token")
 
 		router.ServeHTTP(w, req)
